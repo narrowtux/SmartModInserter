@@ -131,7 +131,11 @@ public class ModpackListWindowController {
                 step.set(step.get() + 1);
             }
 
-            Runtime.getRuntime().exec(new String[]{"open", Datastore.getInstance().getFactorioApplication().toString()});
+            if (OSValidator.isMac()) {
+                Runtime.getRuntime().exec(new String[]{"open", Datastore.getInstance().getFactorioApplication().toString()});
+            } else {
+                Runtime.getRuntime().exec(Datastore.getInstance().getFactorioApplication().toString());
+            }
             step.set(step.get() + 1);
             //progress.setVisible(false);
         }
