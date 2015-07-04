@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<AnchorPane id="AnchorPane" fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="603.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.narrowtux.fmm.ModpackListWindowController">
+  <children>
+    <VBox id="VBox" alignment="CENTER" spacing="5.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+      <children>
+            <TreeTableView fx:id="modpacks" editable="true" prefHeight="200.0" prefWidth="200.0" showRoot="false" VBox.vgrow="ALWAYS">
+              <columns>
+                <TreeTableColumn fx:id="nameColumn" prefWidth="300.0" text="Name" />
+                <TreeTableColumn fx:id="versionColumn" minWidth="0.0" prefWidth="50.0" text="Version" />
+                  <TreeTableColumn fx:id="enabledColumn" prefWidth="40.0" text="Enabled" />
+              </columns>
+            </TreeTableView>
+        <HBox alignment="CENTER_RIGHT" maxHeight="-1.0" prefHeight="-1.0" prefWidth="575.0" spacing="7.0">
+          <children>
+                  <ProgressBar fx:id="progress" prefWidth="200.0" progress="0.0" />
+            <Button mnemonicParsing="false" onAction="#onPlayPressed" text="Play" />
+          </children>
+        </HBox>
+      </children>
+    </VBox>
+  </children>
+</AnchorPane>
