@@ -1,12 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.narrowtux</groupId>
     <artifactId>FactorioModManager</artifactId>
     <version>0.1.2</version>
+
+    <properties>
+        <github.global.server>github</github.global.server>
+    </properties>
+
+    <scm>
+        <connection>scm:git:https://github.com/narrowtux/FactorioModManager.git</connection>
+        <developerConnection>scm:git:git@github.com:narrowtux/FactorioModManager.git</developerConnection>
+        <url>https://github.com/narrowtux/FactorioModManager</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>Github FactorioModManager</name>
+            <url>https://github.com/narrowtux/FactorioModManager.git</url>
+        </repository>
+    </distributionManagement>
 
     <build>
         <plugins>
