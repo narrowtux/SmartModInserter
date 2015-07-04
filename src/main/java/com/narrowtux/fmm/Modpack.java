@@ -66,13 +66,17 @@ public class Modpack {
     }
 
     public void writeModList() {
+        writeModList(getPath().resolve("mod-list.json"), getMods().toArray(new Mod[0]));
+    }
+
+    public static void writeModList(Path file, Mod ... mods) {
         JsonObject root = new JsonObject();
         JsonArray modList = new JsonArray();
         JsonObject baseMod = new JsonObject();
         baseMod.addProperty("name", "base");
         baseMod.addProperty("enabled", true);
         modList.add(baseMod);
-        for (Mod mod : getMods()) {
+        for (Mod mod : mods) {
             JsonObject modInfo = new JsonObject();
             modInfo.addProperty("name", mod.getName());
             modInfo.addProperty("enabled", mod.getEnabled());
@@ -82,7 +86,7 @@ public class Modpack {
         try {
             Gson gson = new Gson();
             String json = gson.toJson(root);
-            FileWriter writer = new FileWriter(new File(getPath().toString(), "mod-list.json"));
+            FileWriter writer = new FileWriter(file.toFile());
             writer.write(json);
             writer.close();
         } catch (IOException e) {

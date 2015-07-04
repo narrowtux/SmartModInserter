@@ -40,7 +40,11 @@ public class Datastore {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                 System.out.println(getTabs() + "Enter directory " + dir);
-                if (Files.exists(Paths.get(dir.toString(), "mod-list.json"))) {
+                Path modList = dir.resolve("mod-list.json");
+                if (!Files.exists(modList) && dir.getParent().equals(getFMMDir())) {
+                    Modpack.writeModList(modList);
+                }
+                if (Files.exists(modList)) {
                     currentModpack = new Modpack(dir.getFileName().toString(), dir);
                     System.out.println(getTabs() + "Enter modpack " + currentModpack.getName());
                     currentTabs++;
@@ -109,7 +113,7 @@ public class Datastore {
                                 .findAny()
                                     .ifPresent(mod2 -> mod2.setEnabled(enabled));
                     }
-
+                    currentModpack.writeModList();
                     Datastore.getInstance().getModpacks().add(currentModpack);
                     currentModpack = null;
                 }

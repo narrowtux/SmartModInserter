@@ -19,7 +19,7 @@ public class Mod {
         setModpack(modpack);
 
         enabledProperty().addListener((observableValue, ov, nv) -> {
-            getModpack().writeModList();
+            modpack.writeModList();
         });
     }
 
