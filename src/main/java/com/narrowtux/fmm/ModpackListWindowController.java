@@ -7,7 +7,9 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -21,8 +23,12 @@ public class ModpackListWindowController {
     TreeTableColumn<Object, String> versionColumn;
     @FXML
     TreeTableColumn<Object, Boolean> enabledColumn;
-    @FXML
-    ProgressBar progress;
+
+    public ModpackListWindowController(Stage settingsStage) {
+        this.settingsStage = settingsStage;
+    }
+
+    Stage settingsStage;
 
     @FXML
     AnchorPane root;
@@ -31,7 +37,6 @@ public class ModpackListWindowController {
 
     @FXML
     public void initialize() {
-        progress.setVisible(false);
         modpacks.setShowRoot(false);
         modpacks.setRoot(treeRoot);
         nameColumn.setCellValueFactory(features -> {
@@ -101,10 +106,10 @@ public class ModpackListWindowController {
             pack = ((Modpack) o);
         }
         if (pack != null) {
-            progress.setVisible(true);
+            //progress.setVisible(true);
             DoubleProperty step = new SimpleDoubleProperty(0);
             int steps = 5 + pack.getMods().size();
-            progress.progressProperty().bind(step.divide(steps));
+            //progress.progressProperty().bind(step.divide(steps));
             Path tmp = null;
             if (Files.exists(Datastore.getInstance().getModDir())) {
                 tmp = Datastore.getInstance().getDataDir().resolve("tmp");
@@ -126,9 +131,19 @@ public class ModpackListWindowController {
                 step.set(step.get() + 1);
             }
 
-            Runtime.getRuntime().exec( new String[] { "open", Datastore.getInstance().getFactorioApplication().toString()} );
+            Runtime.getRuntime().exec(new String[]{"open", Datastore.getInstance().getFactorioApplication().toString()});
             step.set(step.get() + 1);
-            progress.setVisible(false);
+            //progress.setVisible(false);
         }
+    }
+
+    @FXML
+    public void onOpenDataFolderClicked() throws IOException {
+        Desktop.getDesktop().open(Datastore.getInstance().getDataDir().toFile());
+    }
+
+    @FXML
+    public void onSettingsButton() {
+        settingsStage.show();
     }
 }

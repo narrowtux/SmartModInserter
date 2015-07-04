@@ -19,7 +19,8 @@
             </TreeTableView>
         <HBox alignment="CENTER_RIGHT" maxHeight="-1.0" prefHeight="-1.0" prefWidth="575.0" spacing="7.0">
           <children>
-                  <ProgressBar fx:id="progress" prefWidth="200.0" progress="0.0" />
+                  <Button mnemonicParsing="false" onAction="#onSettingsButton" text="Settings" />
+                  <Button mnemonicParsing="false" onAction="#onOpenDataFolderClicked" text="Open data folder" />
             <Button mnemonicParsing="false" onAction="#onPlayPressed" text="Play" />
           </children>
         </HBox>

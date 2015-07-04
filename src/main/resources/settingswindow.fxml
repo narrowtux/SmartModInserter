@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="root" alignment="TOP_RIGHT" maxWidth="-Infinity" prefWidth="415.0" spacing="7.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.narrowtux.fmm.SettingsWindowController">
+   <children>
+      <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="7.0">
+         <children>
+            <Label maxWidth="1.7976931348623157E308" prefWidth="200.0" text="Factorio executable" />
+            <Button fx:id="executableButton" mnemonicParsing="false" onAction="#onSelectExecutableButton" text="..." />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="7.0">
+         <children>
+            <Label maxWidth="1.7976931348623157E308" prefWidth="200.0" text="Factorio data directory" />
+            <Button fx:id="dataButton" mnemonicParsing="false" onAction="#onSelectDataButton" text="..." />
+         </children>
+      </HBox>
+      <Button fx:id="closeButton" mnemonicParsing="false" onAction="#onClose" text="Close" />
+   </children>
+   <padding>
+      <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+   </padding>
+</VBox>
