@@ -1,6 +1,9 @@
 package com.narrowtux.fmm;
 
+import javafx.application.Platform;
 import javafx.beans.property.*;
+import javafx.collections.ListChangeListener;
+import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -16,13 +19,14 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public class ModpackListWindowController {
     @FXML
-    TreeTableView modpacks;
+    TreeTableView<Object> modpacks;
     @FXML
     TreeTableColumn<Object, String> nameColumn;
     @FXML
     TreeTableColumn<Object, String> versionColumn;
     @FXML
     TreeTableColumn<Object, Boolean> enabledColumn;
+    private Datastore store = Datastore.getInstance();
 
     public ModpackListWindowController(Stage settingsStage) {
         this.settingsStage = settingsStage;
@@ -33,7 +37,7 @@ public class ModpackListWindowController {
     @FXML
     AnchorPane root;
 
-    TreeItem treeRoot = new TreeItem<>("root");
+    TreeItem<Object> treeRoot = new TreeItem<>("root");
 
     @FXML
     public void initialize() {
@@ -71,24 +75,44 @@ public class ModpackListWindowController {
         });
         enabledColumn.setCellFactory(CheckBoxTreeTableCell.forTreeTableColumn(enabledColumn));
 
-        for (Modpack modpack : Datastore.getInstance().getModpacks()) {
+        for (Modpack modpack : store.getModpacks()) {
             treeRoot.getChildren().add(getModpackTreeItem(modpack));
         }
+
+        store.getModpacks().addListener((SetChangeListener<Modpack>) change -> {
+                if (change.wasAdded()) {
+                    Platform.runLater(() -> treeRoot.getChildren().add(getModpackTreeItem(change.getElementAdded())));
+                } else if (change.wasRemoved()) {
+                    Platform.runLater(() -> treeRoot.getChildren().stream().filter((TreeItem item2) -> item2.getValue() == change.getElementRemoved()).findAny().ifPresent(item3 -> treeRoot.getChildren().remove(item3)));
+                }
+            });
     }
 
-    private TreeItem<String> getModpackTreeItem(Modpack modpack) {
-        TreeItem item = new TreeItem<>(modpack);
+    private TreeItem<Object> getModpackTreeItem(Modpack modpack) {
+        TreeItem<Object> item = new TreeItem<>(modpack);
         for (Mod mod : modpack.getMods()) {
             item.getChildren().add(getModTreeItem(mod));
         }
+        modpack.getMods().addListener((ListChangeListener<Mod>) change -> {
+            while (change.next()) {
+                if (change.wasAdded()) {
+                    Platform.runLater(() -> change.getAddedSubList().forEach(mod -> item.getChildren().add(getModTreeItem(mod))));
+                } else if (change.wasRemoved()) {
+                    Platform.runLater(() -> {
+                        for (Mod removed : change.getRemoved()) {
+                            item.getChildren().stream().filter(item2 -> item2.getValue() == removed).findAny().ifPresent(item3 -> item.getChildren().remove(item3));
+                        }
+                    });
+                }
+            }
+        });
         return item;
     }
 
-    private TreeItem<String> getModTreeItem(Mod mod) {
-        TreeItem item = new TreeItem<>(mod);
+    private TreeItem<Object> getModTreeItem(Mod mod) {
+        TreeItem<Object> item = new TreeItem<>(mod);
         return item;
     }
-
 
 
     @FXML
