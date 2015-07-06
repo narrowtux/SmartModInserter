@@ -7,6 +7,7 @@ import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
@@ -28,6 +29,8 @@ public class ModpackListWindowController {
     TreeTableColumn<Object, Boolean> enabledColumn;
     @FXML
     ProgressBar progress;
+    @FXML
+    Button playButton;
 
     private Datastore store = Datastore.getInstance();
 
@@ -44,6 +47,14 @@ public class ModpackListWindowController {
 
     @FXML
     public void initialize() {
+        playButton.setDisable(true);
+        modpacks.getSelectionModel().selectedItemProperty().addListener((obs, ov, nv) -> {
+            if (nv == null) {
+                playButton.setDisable(true);
+                return;
+            }
+            playButton.setDisable(!(nv.getValue() instanceof Mod || nv.getValue() instanceof Modpack));
+        });
         modpacks.setShowRoot(false);
         modpacks.setRoot(treeRoot);
         nameColumn.setCellValueFactory(features -> {
@@ -86,7 +97,11 @@ public class ModpackListWindowController {
                 if (change.wasAdded()) {
                     Platform.runLater(() -> treeRoot.getChildren().add(getModpackTreeItem(change.getElementAdded())));
                 } else if (change.wasRemoved()) {
-                    Platform.runLater(() -> treeRoot.getChildren().stream().filter((TreeItem item2) -> item2.getValue() == change.getElementRemoved()).findAny().ifPresent(item3 -> treeRoot.getChildren().remove(item3)));
+                    Platform.runLater(() ->
+                            treeRoot.getChildren().stream()
+                                    .filter((TreeItem item2) -> item2.getValue() == change.getElementRemoved())
+                                    .findAny()
+                                    .ifPresent(item3 -> treeRoot.getChildren().remove(item3)));
                 }
             });
 

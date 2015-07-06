@@ -26,7 +26,7 @@
                       <MenuItem mnemonicParsing="false" onAction="#onSettingsButton" text="Settings ..." />
                     </items>
                   </MenuButton>
-            <Button mnemonicParsing="false" onAction="#onPlayPressed" text="Play" />
+            <Button fx:id="playButton" mnemonicParsing="false" onAction="#onPlayPressed" text="Play" />
           </children>
         </HBox>
       </children>
