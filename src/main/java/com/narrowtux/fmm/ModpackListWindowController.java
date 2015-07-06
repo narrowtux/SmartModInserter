@@ -26,6 +26,9 @@ public class ModpackListWindowController {
     TreeTableColumn<Object, String> versionColumn;
     @FXML
     TreeTableColumn<Object, Boolean> enabledColumn;
+    @FXML
+    ProgressBar progress;
+
     private Datastore store = Datastore.getInstance();
 
     public ModpackListWindowController(Stage settingsStage) {
@@ -86,6 +89,8 @@ public class ModpackListWindowController {
                     Platform.runLater(() -> treeRoot.getChildren().stream().filter((TreeItem item2) -> item2.getValue() == change.getElementRemoved()).findAny().ifPresent(item3 -> treeRoot.getChildren().remove(item3)));
                 }
             });
+
+        progress.setVisible(false);
     }
 
     private TreeItem<Object> getModpackTreeItem(Modpack modpack) {
@@ -117,52 +122,61 @@ public class ModpackListWindowController {
 
     @FXML
     public void onPlayPressed(ActionEvent event) throws IOException {
-        int index = modpacks.getSelectionModel().getFocusedIndex();
-        if (index < 0) {
-            return;
-        }
-        TreeItem item = modpacks.getSelectionModel().getModelItem(index);
-        Object o = item.getValue();
-        Modpack pack = null;
-        if (o instanceof Mod) {
-            pack = ((Mod) o).getModpack();
-        } else if (o instanceof Modpack) {
-            pack = ((Modpack) o);
-        }
-        if (pack != null) {
-            //progress.setVisible(true);
-            DoubleProperty step = new SimpleDoubleProperty(0);
-            int steps = 5 + pack.getMods().size();
-            //progress.progressProperty().bind(step.divide(steps));
-            Path tmp = null;
-            if (Files.exists(Datastore.getInstance().getModDir())) {
-                tmp = Datastore.getInstance().getDataDir().resolve("tmp");
-                Files.move(Datastore.getInstance().getModDir(), tmp);
-                step.set(step.get() + 1);
-            }
-            step.set(step.get() + 1);
-            Files.createDirectory(Datastore.getInstance().getModDir());
+        progress.setVisible(true);
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    int index = modpacks.getSelectionModel().getFocusedIndex();
+                    if (index < 0) {
+                        return;
+                    }
+                    TreeItem item = modpacks.getSelectionModel().getModelItem(index);
+                    Object o = item.getValue();
+                    Modpack pack = null;
+                    if (o instanceof Mod) {
+                        pack = ((Mod) o).getModpack();
+                    } else if (o instanceof Modpack) {
+                        pack = ((Modpack) o);
+                    }
+                    if (pack != null) {
+                        DoubleProperty step = new SimpleDoubleProperty(0);
+                        int steps = 5 + pack.getMods().size();
+                        Platform.runLater(() -> progress.progressProperty().bind(step.divide(steps)));
+                        Path tmp = null;
+                        if (Files.exists(Datastore.getInstance().getModDir())) {
+                            tmp = Datastore.getInstance().getDataDir().resolve("tmp");
+                            Files.move(Datastore.getInstance().getModDir(), tmp);
+                            Platform.runLater(() -> step.set(step.get() + 1));
+                        }
+                        Platform.runLater(() -> step.set(step.get() + 1));
+                        Files.createDirectory(Datastore.getInstance().getModDir());
 
-            Files.copy(pack.getPath().resolve("mod-list.json"), Datastore.getInstance().getModDir().resolve("mod-list.json"));
-            step.set(step.get() + 1);
-            for (Mod mod : pack.getMods()) {
-                Files.copy(mod.getPath(), Datastore.getInstance().getModDir().resolve(mod.getPath().getFileName()));
-                step.set(step.get() + 1);
-            }
+                        Files.copy(pack.getPath().resolve("mod-list.json"), Datastore.getInstance().getModDir().resolve("mod-list.json"));
+                        Platform.runLater(() -> step.set(step.get() + 1));
+                        for (Mod mod : pack.getMods()) {
+                            Files.copy(mod.getPath(), Datastore.getInstance().getModDir().resolve(mod.getPath().getFileName()));
+                            Platform.runLater(() -> step.set(step.get() + 1));
+                        }
 
-            if (tmp != null) {
-                Files.walkFileTree(tmp, new FileDeleter());
-                step.set(step.get() + 1);
-            }
+                        if (tmp != null) {
+                            Files.walkFileTree(tmp, new FileDeleter());
+                            Platform.runLater(() -> step.set(step.get() + 1));
+                        }
 
-            if (OSValidator.isMac()) {
-                Runtime.getRuntime().exec(new String[]{"open", Datastore.getInstance().getFactorioApplication().toString()});
-            } else {
-                Runtime.getRuntime().exec(Datastore.getInstance().getFactorioApplication().toString());
+                        if (OSValidator.isMac()) {
+                            Runtime.getRuntime().exec(new String[]{"open", Datastore.getInstance().getFactorioApplication().toString()});
+                        } else {
+                            Runtime.getRuntime().exec(Datastore.getInstance().getFactorioApplication().toString());
+                        }
+                        Platform.runLater(() -> progress.setVisible(false));
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            step.set(step.get() + 1);
-            //progress.setVisible(false);
-        }
+        });
+        thread.start();
     }
 
     @FXML
