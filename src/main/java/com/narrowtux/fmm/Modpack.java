@@ -15,6 +15,7 @@ import javafx.scene.control.TreeItem;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -27,6 +28,26 @@ public class Modpack {
     public Modpack(String name, Path path) {
         setName(name);
         setPath(path);
+
+        nameProperty().addListener((obs, ov, nv) -> {
+            if (nv == null || nv.isEmpty() || nv.contains("/")) {
+                setName(ov);
+                return;
+            }
+            Path newPath = getPath().getParent().resolve(nv);
+            try {
+                Files.move(getPath(), newPath);
+                setPath(newPath);
+                for (Mod mod : getMods()) {
+                    String fileName = mod.getPath().getFileName().toString();
+                    Path modNewPath = mod.getPath().getParent().getParent().resolve(nv).resolve(fileName);
+                    mod.setPath(modNewPath);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                setName(ov);
+            }
+        });
     }
 
     public String getName() {

@@ -9,9 +9,13 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
+import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import javafx.util.Callback;
+import javafx.util.StringConverter;
+import javafx.util.converter.DefaultStringConverter;
 
 import java.awt.*;
 import java.io.IOException;
@@ -67,6 +71,22 @@ public class ModpackListWindowController {
             }
             return null;
         });
+        nameColumn.setCellFactory(new Callback<TreeTableColumn<Object, String>, TreeTableCell<Object, String>>() {
+            @Override
+            public TreeTableCell<Object, String> call(TreeTableColumn<Object, String> objectStringTreeTableColumn) {
+                return new TextFieldTreeTableCell<Object, String>(new DefaultStringConverter()) {
+                    @Override
+                    public void startEdit() {
+                        super.startEdit();
+                        TreeItem item = modpacks.getTreeItem(getIndex());
+                        if (item == null || !(item.getValue() instanceof Modpack)) {
+                            cancelEdit();
+                        }
+                    }
+                };
+            }
+        });
+        nameColumn.setEditable(true);
         versionColumn.setCellValueFactory(features -> {
             Object value = features.getValue().getValue();
             if (value instanceof Mod) {
@@ -87,7 +107,26 @@ public class ModpackListWindowController {
             }));
             return simpleBooleanProperty;
         });
-        enabledColumn.setCellFactory(CheckBoxTreeTableCell.forTreeTableColumn(enabledColumn));
+        enabledColumn.setCellFactory(new Callback<TreeTableColumn<Object, Boolean>, TreeTableCell<Object, Boolean>>() {
+            @Override
+            public TreeTableCell<Object, Boolean> call(TreeTableColumn<Object, Boolean> objectBooleanTreeTableColumn) {
+                return new CheckBoxTreeTableCell<Object, Boolean>() {
+                    @Override
+                    public void updateItem(Boolean value, boolean empty) {
+                        super.updateItem(value, empty);
+
+                        if (empty) {
+                            setText(null);
+                            setGraphic(null);
+                        }
+                        TreeItem item = modpacks.getTreeItem(getIndex());
+                        if (item == null || !(item.getValue() instanceof Mod)) {
+                            setGraphic(null);
+                        }
+                    }
+                };
+            }
+        });
 
         for (Modpack modpack : store.getModpacks()) {
             treeRoot.getChildren().add(getModpackTreeItem(modpack));
@@ -138,57 +177,54 @@ public class ModpackListWindowController {
     @FXML
     public void onPlayPressed(ActionEvent event) throws IOException {
         progress.setVisible(true);
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    int index = modpacks.getSelectionModel().getFocusedIndex();
-                    if (index < 0) {
-                        return;
-                    }
-                    TreeItem item = modpacks.getSelectionModel().getModelItem(index);
-                    Object o = item.getValue();
-                    Modpack pack = null;
-                    if (o instanceof Mod) {
-                        pack = ((Mod) o).getModpack();
-                    } else if (o instanceof Modpack) {
-                        pack = ((Modpack) o);
-                    }
-                    if (pack != null) {
-                        DoubleProperty step = new SimpleDoubleProperty(0);
-                        int steps = 5 + pack.getMods().size();
-                        Platform.runLater(() -> progress.progressProperty().bind(step.divide(steps)));
-                        Path tmp = null;
-                        if (Files.exists(Datastore.getInstance().getModDir())) {
-                            tmp = Datastore.getInstance().getDataDir().resolve("tmp");
-                            Files.move(Datastore.getInstance().getModDir(), tmp);
-                            Platform.runLater(() -> step.set(step.get() + 1));
-                        }
-                        Platform.runLater(() -> step.set(step.get() + 1));
-                        Files.createDirectory(Datastore.getInstance().getModDir());
-
-                        Files.copy(pack.getPath().resolve("mod-list.json"), Datastore.getInstance().getModDir().resolve("mod-list.json"));
-                        Platform.runLater(() -> step.set(step.get() + 1));
-                        for (Mod mod : pack.getMods()) {
-                            Files.copy(mod.getPath(), Datastore.getInstance().getModDir().resolve(mod.getPath().getFileName()));
-                            Platform.runLater(() -> step.set(step.get() + 1));
-                        }
-
-                        if (tmp != null) {
-                            Files.walkFileTree(tmp, new FileDeleter());
-                            Platform.runLater(() -> step.set(step.get() + 1));
-                        }
-
-                        if (OSValidator.isMac()) {
-                            Runtime.getRuntime().exec(new String[]{"open", Datastore.getInstance().getFactorioApplication().toString()});
-                        } else {
-                            Runtime.getRuntime().exec(Datastore.getInstance().getFactorioApplication().toString());
-                        }
-                        Platform.runLater(() -> progress.setVisible(false));
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+        Thread thread = new Thread(() -> {
+            try {
+                int index = modpacks.getSelectionModel().getFocusedIndex();
+                if (index < 0) {
+                    return;
                 }
+                TreeItem item = modpacks.getSelectionModel().getModelItem(index);
+                Object o = item.getValue();
+                Modpack pack = null;
+                if (o instanceof Mod) {
+                    pack = ((Mod) o).getModpack();
+                } else if (o instanceof Modpack) {
+                    pack = ((Modpack) o);
+                }
+                if (pack != null) {
+                    DoubleProperty step = new SimpleDoubleProperty(0);
+                    int steps = 5 + pack.getMods().size();
+                    Platform.runLater(() -> progress.progressProperty().bind(step.divide(steps)));
+                    Path tmp = null;
+                    if (Files.exists(Datastore.getInstance().getModDir())) {
+                        tmp = Datastore.getInstance().getDataDir().resolve("tmp");
+                        Files.move(Datastore.getInstance().getModDir(), tmp);
+                        Platform.runLater(() -> step.set(step.get() + 1));
+                    }
+                    Platform.runLater(() -> step.set(step.get() + 1));
+                    Files.createDirectory(Datastore.getInstance().getModDir());
+
+                    Files.copy(pack.getPath().resolve("mod-list.json"), Datastore.getInstance().getModDir().resolve("mod-list.json"));
+                    Platform.runLater(() -> step.set(step.get() + 1));
+                    for (Mod mod : pack.getMods()) {
+                        Files.copy(mod.getPath(), Datastore.getInstance().getModDir().resolve(mod.getPath().getFileName()));
+                        Platform.runLater(() -> step.set(step.get() + 1));
+                    }
+
+                    if (tmp != null) {
+                        Files.walkFileTree(tmp, new FileDeleter());
+                        Platform.runLater(() -> step.set(step.get() + 1));
+                    }
+
+                    if (OSValidator.isMac()) {
+                        Runtime.getRuntime().exec(new String[]{"open", Datastore.getInstance().getFactorioApplication().toString()});
+                    } else {
+                        Runtime.getRuntime().exec(Datastore.getInstance().getFactorioApplication().toString());
+                    }
+                    Platform.runLater(() -> progress.setVisible(false));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
         thread.start();
