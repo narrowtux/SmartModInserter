@@ -1,18 +1,17 @@
 package com.narrowtux.fmm;
 
 import javafx.beans.property.*;
-import javafx.scene.control.TreeItem;
 
 import java.nio.file.Path;
 
 public class Mod {
     private StringProperty name = new SimpleStringProperty();
-    private StringProperty version = new SimpleStringProperty();
+    private ObjectProperty<Version> version = new SimpleObjectProperty<>(null);
     private BooleanProperty enabled = new SimpleBooleanProperty(true);
     private ObjectProperty<Path> path = new SimpleObjectProperty<>();
     private ObjectProperty<Modpack> modpack = new SimpleObjectProperty<>();
 
-    public Mod(String name, String version, Path path, Modpack modpack) {
+    public Mod(String name, Version version, Path path, Modpack modpack) {
         setName(name);
         setVersion(version);
         setPath(path);
@@ -59,15 +58,15 @@ public class Mod {
         this.name.set(name);
     }
 
-    public String getVersion() {
+    public Version getVersion() {
         return version.get();
     }
 
-    public StringProperty versionProperty() {
+    public ObjectProperty<Version> versionProperty() {
         return version;
     }
 
-    public void setVersion(String version) {
+    public void setVersion(Version version) {
         this.version.set(version);
     }
 
