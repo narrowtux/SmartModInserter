@@ -11,6 +11,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -35,6 +37,8 @@ public class ModpackListWindowController {
     ProgressBar progress;
     @FXML
     Button playButton;
+    @FXML
+    TabPane tabPane;
 
     private Datastore store = Datastore.getInstance();
 
@@ -51,6 +55,7 @@ public class ModpackListWindowController {
 
     @FXML
     public void initialize() {
+        tabPane.getSelectionModel().select(1);
         playButton.setDisable(true);
         modpacks.getSelectionModel().selectedItemProperty().addListener((obs, ov, nv) -> {
             if (nv == null) {
