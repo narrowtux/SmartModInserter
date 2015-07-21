@@ -19,7 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class Main extends Application {
+public class FactorioModManagerApplication extends Application {
 
     private SettingsWindowController settingsWindowController;
     private Stage settingsStage;

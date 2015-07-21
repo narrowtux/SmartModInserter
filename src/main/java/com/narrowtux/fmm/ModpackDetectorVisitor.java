@@ -74,7 +74,7 @@ class ModpackDetectorVisitor implements FileVisitor<Path> {
             if (current != null) {
                 Gson gson = new Gson();
                 Map<String, Object> modInfo = gson.fromJson(new InputStreamReader(zipInputStream), Map.class);
-                Mod mod = new Mod(((String) modInfo.get("name")), ((String) modInfo.get("version")), file, currentModpack);
+                Mod mod = new Mod(((String) modInfo.get("name")), Version.valueOf((String) modInfo.get("version")), file, currentModpack);
                 currentModpack.getMods().add(mod);
 
                 out.println("Found mod: " + mod.toString());

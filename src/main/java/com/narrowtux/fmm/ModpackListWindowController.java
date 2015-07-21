@@ -11,6 +11,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -35,6 +37,8 @@ public class ModpackListWindowController {
     ProgressBar progress;
     @FXML
     Button playButton;
+    @FXML
+    TabPane tabPane;
 
     private Datastore store = Datastore.getInstance();
 
@@ -51,6 +55,7 @@ public class ModpackListWindowController {
 
     @FXML
     public void initialize() {
+        tabPane.getSelectionModel().select(1);
         playButton.setDisable(true);
         modpacks.getSelectionModel().selectedItemProperty().addListener((obs, ov, nv) -> {
             if (nv == null) {
@@ -90,7 +95,7 @@ public class ModpackListWindowController {
         versionColumn.setCellValueFactory(features -> {
             Object value = features.getValue().getValue();
             if (value instanceof Mod) {
-                return ((Mod) value).versionProperty();
+                return ((Mod) value).versionProperty().asString();
             }
             return null;
         });
@@ -176,58 +181,33 @@ public class ModpackListWindowController {
 
     @FXML
     public void onPlayPressed(ActionEvent event) throws IOException {
-        progress.setVisible(true);
-        Thread thread = new Thread(() -> {
-            try {
-                int index = modpacks.getSelectionModel().getFocusedIndex();
-                if (index < 0) {
-                    return;
-                }
-                TreeItem item = modpacks.getSelectionModel().getModelItem(index);
-                Object o = item.getValue();
-                Modpack pack = null;
-                if (o instanceof Mod) {
-                    pack = ((Mod) o).getModpack();
-                } else if (o instanceof Modpack) {
-                    pack = ((Modpack) o);
-                }
-                if (pack != null) {
-                    DoubleProperty step = new SimpleDoubleProperty(0);
-                    int steps = 5 + pack.getMods().size();
-                    Platform.runLater(() -> progress.progressProperty().bind(step.divide(steps)));
-                    Path tmp = null;
-                    if (Files.exists(Datastore.getInstance().getModDir())) {
-                        tmp = Datastore.getInstance().getDataDir().resolve("tmp");
-                        Files.move(Datastore.getInstance().getModDir(), tmp);
-                        Platform.runLater(() -> step.set(step.get() + 1));
-                    }
-                    Platform.runLater(() -> step.set(step.get() + 1));
-                    Files.createDirectory(Datastore.getInstance().getModDir());
-
-                    Files.copy(pack.getPath().resolve("mod-list.json"), Datastore.getInstance().getModDir().resolve("mod-list.json"));
-                    Platform.runLater(() -> step.set(step.get() + 1));
-                    for (Mod mod : pack.getMods()) {
-                        Files.copy(mod.getPath(), Datastore.getInstance().getModDir().resolve(mod.getPath().getFileName()));
-                        Platform.runLater(() -> step.set(step.get() + 1));
-                    }
-
-                    if (tmp != null) {
-                        Files.walkFileTree(tmp, new FileDeleter());
-                        Platform.runLater(() -> step.set(step.get() + 1));
-                    }
-
-                    if (OSValidator.isMac()) {
-                        Runtime.getRuntime().exec(new String[]{"open", Datastore.getInstance().getFactorioApplication().toString()});
-                    } else {
-                        Runtime.getRuntime().exec(Datastore.getInstance().getFactorioApplication().toString());
-                    }
-                    Platform.runLater(() -> progress.setVisible(false));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        thread.start();
+        int index = modpacks.getSelectionModel().getFocusedIndex();
+        if (index < 0) {
+            return;
+        }
+        TreeItem item = modpacks.getSelectionModel().getModelItem(index);
+        Object o = item.getValue();
+        Modpack pack = null;
+        if (o instanceof Mod) {
+            pack = ((Mod) o).getModpack();
+        } else if (o instanceof Modpack) {
+            pack = ((Modpack) o);
+        }
+        if (pack != null) {
+            ModpackInstaller installer = new ModpackInstaller(pack);
+            progress.setVisible(true);
+            playButton.setDisable(true);
+            progress.progressProperty().bind(installer.progressProperty());
+            installer.setOnDone(() -> {
+                progress.setVisible(false);
+                playButton.setDisable(false);
+            });
+            installer.setOnError((e) -> {
+                progress.setVisible(false);
+                playButton.setDisable(false);
+            });
+            installer.start();
+        }
     }
 
     @FXML
