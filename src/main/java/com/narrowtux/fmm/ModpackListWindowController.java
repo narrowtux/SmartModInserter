@@ -6,18 +6,22 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -60,6 +64,8 @@ public class ModpackListWindowController {
     @FXML TableColumn<Mod, Double> modsProgressColumn;
 
     TreeItem<Object> treeRoot = new TreeItem<>("root");
+
+    @FXML ListView<Save> saves;
 
     @FXML
     public void initialize() {
@@ -164,6 +170,33 @@ public class ModpackListWindowController {
         modsVersionColumn.setCellValueFactory(features -> features.getValue().versionProperty());
 
         mods.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        saves.setItems(store.getSaves());
+        saves.setCellFactory(saveListView -> {
+            return new ListCell<Save>() {
+                @Override
+                protected void updateItem(Save save, boolean empty) {
+                    super.updateItem(save, empty);
+
+                    if (!empty) {
+                        setText(null);
+                        GridPane pane = new GridPane();
+                        pane.setHgap(10);
+                        pane.setVgap(4);
+                        pane.setPadding(new Insets(0, 10, 0, 10));
+                        ImageView screenshot = new ImageView(save.getScreenshot());
+                        screenshot.setPreserveRatio(true);
+                        screenshot.setFitWidth(64);
+                        pane.add(screenshot, 0, 0, 1, 2);
+                        Label name = new Label(save.getName());
+                        Label fileName = new Label(save.getPath().getFileName().toString());
+                        pane.add(name, 1, 0, 1, 1);
+                        pane.add(fileName, 1, 1, 1, 1);
+                        setGraphic(pane);
+                    }
+                }
+            };
+        });
     }
 
     ContextMenu currentMenu = null;

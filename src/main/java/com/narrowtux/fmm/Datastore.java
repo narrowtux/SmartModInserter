@@ -30,6 +30,7 @@ public class Datastore {
     private ObjectProperty<Path> dataDir = new SimpleObjectProperty<>(null);
     private ObjectProperty<Path> factorioApplication = new SimpleObjectProperty<>();
     private ObjectProperty<Path> storageDir = new SimpleObjectProperty<>();
+    private ObservableList<Save> saves = FXCollections.observableArrayList();
     private FileVisitor<Path> fmmScaner = new ModpackDetectorVisitor(getModpacks());
 
     public Datastore() {
@@ -84,10 +85,16 @@ public class Datastore {
                     }
                 });
         Files.walkFileTree(path, fmmScaner);
+
+        Files.walk(getDataDir().resolve("saves")).filter(p -> Files.isRegularFile(p)).filter(p -> p.getFileName().toString().endsWith(".zip"))
+                .forEach(saveZipFile -> {
+                    Save save = new Save(saveZipFile);
+                    saves.add(save);
+                });
     }
 
     public Mod getMod(String name, Version version) {
-        return getMods().stream().filter(mod -> mod.getName().equals(name) && mod.getVersion().equals(version)).findAny().orElse(null);
+        return getMods().stream().filter(mod -> mod.getName().equals(name) && version.equals(mod.getVersion())).findAny().orElse(null);
     }
 
     public ObservableSet<Modpack> getModpacks() {
@@ -140,5 +147,9 @@ public class Datastore {
 
     public ObservableList<Mod> getMods() {
         return mods;
+    }
+
+    public ObservableList<Save> getSaves() {
+        return saves;
     }
 }
