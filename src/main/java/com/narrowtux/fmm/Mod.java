@@ -2,37 +2,37 @@ package com.narrowtux.fmm;
 
 import javafx.beans.property.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class Mod {
     private StringProperty name = new SimpleStringProperty();
     private ObjectProperty<Version> version = new SimpleObjectProperty<>(null);
-    private BooleanProperty enabled = new SimpleBooleanProperty(true);
     private ObjectProperty<Path> path = new SimpleObjectProperty<>();
-    private ObjectProperty<Modpack> modpack = new SimpleObjectProperty<>();
 
-    public Mod(String name, Version version, Path path, Modpack modpack) {
+    public Mod(String name, Version version, Path path) {
         setName(name);
         setVersion(version);
         setPath(path);
-        setModpack(modpack);
 
-        enabledProperty().addListener((observableValue, ov, nv) -> {
-            modpack.writeModList();
+        // move file if it has been renamed
+        pathProperty().addListener((obj, ov, nv) -> {
+            if (nv != null && ov != null && !nv.equals(ov)) {
+                try {
+                    if (Files.exists(ov) && !Files.exists(nv)) {
+                        Files.move(ov, nv);
+                    }
+                    if (Files.exists(ov) && Files.exists(nv)) {
+                        Files.delete(ov);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         });
     }
 
-    public Modpack getModpack() {
-        return modpack.get();
-    }
-
-    public ObjectProperty<Modpack> modpackProperty() {
-        return modpack;
-    }
-
-    public void setModpack(Modpack modpack) {
-        this.modpack.set(modpack);
-    }
 
     public Path getPath() {
         return path.get();
@@ -70,16 +70,8 @@ public class Mod {
         this.version.set(version);
     }
 
-    public boolean getEnabled() {
-        return enabled.get();
-    }
-
-    public BooleanProperty enabledProperty() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled.set(enabled);
+    public String toSimpleString() {
+        return getName() + '#' + getVersion().toString();
     }
 
     @Override
@@ -90,4 +82,22 @@ public class Mod {
                 '}';
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Mod mod = (Mod) o;
+
+        if (!name.equals(mod.name)) return false;
+        return version.equals(mod.version);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + version.hashCode();
+        return result;
+    }
 }

@@ -11,6 +11,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -32,14 +33,14 @@ class ModpackDetectorVisitor implements FileVisitor<Path> {
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
         out.println("Enter directory " + dir);
         Path modList = dir.resolve("mod-list.json");
-        if (!Files.exists(modList) && dir.getParent().equals(store.getFMMDir())) {
-            Modpack.writeModList(modList);
+        if (!dir.getFileName().toString().equals("mods") && !Files.exists(modList) && dir.getParent().equals(store.getFMMDir())) {
+            Modpack.writeModList(modList, false);
         }
-        if (Files.exists(modList)) {
+        if (!dir.getFileName().toString().equals("mods") && Files.exists(modList)) {
             currentModpack = modpacks.stream().filter(m -> m.getPath().equals(dir)).findAny().orElseGet(() -> new Modpack(dir.getFileName().toString(), dir));
             out.println("Enter modpack " + currentModpack.getName());
             //remove all mods that are missing in the directory
-            currentModpack.getMods().removeAll(currentModpack.getMods().stream().filter(mod -> !Files.exists(mod.getPath())).collect(Collectors.toList()));
+            currentModpack.getMods().removeAll(currentModpack.getMods().stream().filter(mod -> !Files.exists(mod.getMod().getPath())).collect(Collectors.toList()));
             out.push();
             return FileVisitResult.CONTINUE;
         }
@@ -58,30 +59,26 @@ class ModpackDetectorVisitor implements FileVisitor<Path> {
             return FileVisitResult.CONTINUE;
         }
         out.println("Checking file " + file.toString());
-        if (currentModpack.getMods().stream().filter(mod -> mod.getPath().equals(file)).findAny().isPresent()) {
+        if (currentModpack.getMods().stream().filter(mod -> mod.getMod().getPath().equals(file)).findAny().isPresent()) {
             return FileVisitResult.CONTINUE;
         }
         if (file.getFileName().toString().endsWith(".zip")) {
-            FileInputStream inputStream = new FileInputStream(file.toFile());
-            ZipInputStream zipInputStream = new ZipInputStream(inputStream);
-            ZipEntry current;
-            out.push();
-            while ((current = zipInputStream.getNextEntry()) != null) {
-                if (current.getName().endsWith("info.json")) {
-                    break;
-                }
-            }
-            if (current != null) {
-                Gson gson = new Gson();
-                Map<String, Object> modInfo = gson.fromJson(new InputStreamReader(zipInputStream), Map.class);
-                Mod mod = new Mod(((String) modInfo.get("name")), Version.valueOf((String) modInfo.get("version")), file, currentModpack);
-                currentModpack.getMods().add(mod);
+            Mod mod = parseMod(file);
 
-                out.println("Found mod: " + mod.toString());
-                zipInputStream.closeEntry();
-                zipInputStream.close();
+            if (mod != null) {
+                out.push();
+                out.println("Found mod " + mod.toSimpleString());
+                out.pull();
+
+                Path oldPath = mod.getPath();
+                Path newPath = store.getFMMDir().resolve("mods").resolve(oldPath.getFileName());
+
+                mod.setPath(newPath);
+
+                currentModpack.getMods().add(new ModReference(mod, currentModpack, true));
+                store.getMods().add(mod);
+
             }
-            out.pull();
         }
         return FileVisitResult.CONTINUE;
     }
@@ -93,8 +90,7 @@ class ModpackDetectorVisitor implements FileVisitor<Path> {
 
     @Override
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-        out.pull();
-        out.println("Leave");
+
         if (currentModpack != null) {
             // read mod-list.json
             Gson gson = new Gson();
@@ -102,17 +98,56 @@ class ModpackDetectorVisitor implements FileVisitor<Path> {
             List<Map<String, Object>> modList = (List<Map<String, Object>>) modListData.get("mods");
             for (Map<String, Object> mod : modList) {
                 String name = (String) mod.get("name");
+                String version = null;
+                if (mod.containsKey("version")) {
+                    version = (String) mod.get("version");
+                }
                 Object enabledO = mod.get("enabled");
                 boolean enabled = enabledO instanceof Boolean ? (Boolean) enabledO : Boolean.valueOf((String) enabledO);
-                currentModpack.getMods().stream()
-                        .filter(mod1 -> mod1.getName().equals(name))
-                        .findAny()
-                        .ifPresent(mod2 -> mod2.setEnabled(enabled));
+                Optional<ModReference> ref = currentModpack.getMods().stream()
+                        .filter(mod1 -> mod1.getMod().getName().equals(name))
+                        .findAny();
+                ref.ifPresent(mod2 -> mod2.setEnabled(enabled));
+                if (!ref.isPresent()) {
+                    Mod realMod = null;
+                    if (version != null) {
+                        realMod = store.getMod(name, Version.valueOf(version));
+                    }
+                    if (realMod == null) {
+                        out.println("could not find mod from mod-list.json: " + name + " version: " + version);
+                    } else {
+                        ModReference reference = new ModReference(realMod, currentModpack, enabled);
+                        currentModpack.getMods().add(reference);
+                    }
+                }
             }
-            currentModpack.writeModList();
+            currentModpack.writeModList(true);
             Datastore.getInstance().getModpacks().add(currentModpack);
             currentModpack = null;
         }
+        out.pull();
+        out.println("Leave");
         return FileVisitResult.CONTINUE;
+    }
+
+    public static Mod parseMod(Path file) throws IOException {
+        FileInputStream inputStream = new FileInputStream(file.toFile());
+        ZipInputStream zipInputStream = new ZipInputStream(inputStream);
+        ZipEntry current;
+        while ((current = zipInputStream.getNextEntry()) != null) {
+            if (current.getName().endsWith("info.json")) {
+                break;
+            }
+        }
+        if (current != null) {
+            Gson gson = new Gson();
+            Map<String, Object> modInfo = gson.fromJson(new InputStreamReader(zipInputStream), Map.class);
+            Mod mod = new Mod(((String) modInfo.get("name")), Version.valueOf((String) modInfo.get("version")), file);
+
+            zipInputStream.closeEntry();
+            zipInputStream.close();
+            return mod;
+        }
+        return null;
     }
 }

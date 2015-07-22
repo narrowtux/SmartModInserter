@@ -10,6 +10,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import javafx.scene.control.TreeItem;
 
 import java.io.File;
@@ -18,11 +19,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 public class Modpack {
     private StringProperty name = new SimpleStringProperty();
-    private ObservableList<Mod> mods = FXCollections.observableList(new LinkedList<Mod>());
+    private ObservableSet<ModReference> mods = FXCollections.observableSet(new LinkedHashSet<ModReference>());
     private ObjectProperty<Path> path = new SimpleObjectProperty<>();
 
     public Modpack(String name, Path path) {
@@ -38,10 +40,10 @@ public class Modpack {
             try {
                 Files.move(getPath(), newPath);
                 setPath(newPath);
-                for (Mod mod : getMods()) {
-                    String fileName = mod.getPath().getFileName().toString();
-                    Path modNewPath = mod.getPath().getParent().getParent().resolve(nv).resolve(fileName);
-                    mod.setPath(modNewPath);
+                for (ModReference mod : getMods()) {
+                    String fileName = mod.getMod().getPath().getFileName().toString();
+                    Path modNewPath = mod.getMod().getPath().getParent().getParent().resolve(nv).resolve(fileName);
+                    mod.getMod().setPath(modNewPath);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -74,7 +76,7 @@ public class Modpack {
         this.path.set(path);
     }
 
-    public ObservableList<Mod> getMods() {
+    public ObservableSet<ModReference> getMods() {
         return mods;
     }
 
@@ -87,20 +89,27 @@ public class Modpack {
     }
 
     public void writeModList() {
-        writeModList(getPath().resolve("mod-list.json"), getMods().toArray(new Mod[0]));
+        writeModList(false);
     }
 
-    public static void writeModList(Path file, Mod ... mods) {
+    public void writeModList(boolean writeVersion) {
+        writeModList(getPath().resolve("mod-list.json"), writeVersion, getMods().toArray(new ModReference[0]));
+    }
+
+    public static void writeModList(Path file, boolean writeVersion, ModReference ... mods) {
         JsonObject root = new JsonObject();
         JsonArray modList = new JsonArray();
         JsonObject baseMod = new JsonObject();
         baseMod.addProperty("name", "base");
         baseMod.addProperty("enabled", true);
         modList.add(baseMod);
-        for (Mod mod : mods) {
+        for (ModReference mod : mods) {
             JsonObject modInfo = new JsonObject();
-            modInfo.addProperty("name", mod.getName());
+            modInfo.addProperty("name", mod.getMod().getName());
             modInfo.addProperty("enabled", mod.getEnabled());
+            if (writeVersion) {
+                modInfo.addProperty("version", mod.getMod().getVersion().toString());
+            }
             modList.add(modInfo);
         }
         root.add("mods", modList);

@@ -6,59 +6,85 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
-<AnchorPane id="AnchorPane" fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="603.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.narrowtux.fmm.ModpackListWindowController">
-  <children><TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns:fx="http://javafx.com/fxml">
-  <tabs>
-    <Tab text="Mods">
-      <content>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-<children><VBox layoutX="109.0" layoutY="14.0" prefWidth="100.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-<padding>
-<Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
-</padding>
-<children><TableView prefWidth="200.0" xmlns:fx="http://javafx.com/fxml">
-  <columns>
-    <TableColumn prefWidth="200.0" text="Name" />
-    <TableColumn prefWidth="75.0" text="Version" /><TableColumn prefWidth="100.0" text="Progress" />
-  </columns>
-</TableView>
-</children></VBox>
-</children></AnchorPane>
-      </content>
-    </Tab>
-    <Tab text="Modpacks">
-<content><AnchorPane prefHeight="200.0" prefWidth="200.0">
-<children>
-    <VBox id="VBox" alignment="CENTER" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-      <children>
-            <TreeTableView fx:id="modpacks" editable="true" prefHeight="200.0" prefWidth="200.0" showRoot="false" VBox.vgrow="ALWAYS">
-              <columns>
-                <TreeTableColumn fx:id="nameColumn" prefWidth="300.0" text="Name" />
-                <TreeTableColumn fx:id="versionColumn" minWidth="0.0" prefWidth="50.0" text="Version" />
-                  <TreeTableColumn fx:id="enabledColumn" prefWidth="40.0" text="Enabled" />
-              </columns>
-            </TreeTableView>
-        <HBox alignment="CENTER_RIGHT" maxHeight="-1.0" prefHeight="-1.0" prefWidth="575.0" spacing="7.0">
-          <children>
-                  <ProgressBar fx:id="progress" prefWidth="200.0" progress="0.0" />
-                  <MenuButton mnemonicParsing="false" text="Options">
-                    <items>
-                      <MenuItem mnemonicParsing="false" onAction="#onOpenDataFolderClicked" text="Data Folder ..." />
-                      <MenuItem mnemonicParsing="false" onAction="#onSettingsButton" text="Settings ..." />
-                    </items>
+<AnchorPane id="AnchorPane" fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="480.0" minWidth="320.0" prefHeight="568.0" prefWidth="603.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.narrowtux.fmm.ModpackListWindowController">
+    <children>
+        <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns:fx="http://javafx.com/fxml">
+            <tabs>
+                <Tab text="Mods">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <VBox layoutX="109.0" layoutY="14.0" prefWidth="100.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <padding>
+                                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+                                    </padding>
+                                    <children>
+                                        <TableView fx:id="mods" onContextMenuRequested="#onModsContext" prefWidth="200.0" VBox.vgrow="SOMETIMES" xmlns:fx="http://javafx.com/fxml">
+                                            <columns>
+                                                <TableColumn fx:id="modsNameColumn" prefWidth="200.0" text="Name" />
+                                                <TableColumn fx:id="modsVersionColumn" prefWidth="75.0" text="Version" />
+                                                <TableColumn fx:id="modsProgressColumn" prefWidth="100.0" text="Progress" />
+                                            </columns>
+                                        </TableView>
+                              <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="7.0" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab text="Modpacks">
+                    <content>
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                            <children>
+                                <VBox id="VBox" alignment="CENTER" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <TreeTableView fx:id="modpacks" editable="true" prefHeight="200.0" prefWidth="200.0" showRoot="false" VBox.vgrow="ALWAYS">
+                                            <columns>
+                                                <TreeTableColumn fx:id="nameColumn" prefWidth="300.0" text="Name" />
+                                                <TreeTableColumn fx:id="versionColumn" minWidth="0.0" prefWidth="50.0" text="Version" />
+                                                <TreeTableColumn fx:id="enabledColumn" prefWidth="40.0" text="Enabled" />
+                                            </columns>
+                                        </TreeTableView>
+                                        <HBox alignment="CENTER_RIGHT" maxHeight="-1.0" prefHeight="-1.0" prefWidth="575.0" spacing="7.0">
+                                            <children>
+                                                <ProgressBar fx:id="progress" prefWidth="200.0" progress="0.0" />
+                                    <Button mnemonicParsing="false" onAction="#onModpackAddAction" text="Add" />
+                                                <Button fx:id="playButton" mnemonicParsing="false" onAction="#onPlayPressed" text="Play" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+                                    </padding>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+            <Tab text="Saves">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <VBox layoutX="14.0" layoutY="14.0" prefHeight="502.0" prefWidth="577.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <padding>
+                              <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+                           </padding>
+                           <children>
+                              <ListView fx:id="saves" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="SOMETIMES" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            </tabs>
+        </TabPane>
+                  <MenuButton mnemonicParsing="false" text="Options" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="7.0">
+                      <items>
+                          <MenuItem mnemonicParsing="false" onAction="#onOpenDataFolderClicked" text="Data Folder ..." />
+                          <MenuItem mnemonicParsing="false" onAction="#onSettingsButton" text="Settings ..." />
+                      </items>
                   </MenuButton>
-            <Button fx:id="playButton" mnemonicParsing="false" onAction="#onPlayPressed" text="Play" />
-          </children>
-        </HBox>
-      </children>
-<padding>
-<Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
-</padding>
-    </VBox>
-</children></AnchorPane>
-</content>
-    </Tab>
-  </tabs>
-</TabPane>
-  </children>
+    </children>
 </AnchorPane>

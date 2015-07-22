@@ -36,9 +36,7 @@ public class FactorioModManagerApplication extends Application {
             Path appData = Paths.get(System.getenv("AppData"));
             store.setDataDir(appData.resolve("factorio"));
             store.setStorageDir(appData.resolve("FactorioModManager"));
-        } else if (OSValidator.isUnix()) {
-            //TODO tell them to specify their installation directory
-        }
+        } // linux users have to define everything themselves
         Path settingsPath = store.getStorageDir().resolve("settings.json");
         if (Files.exists(settingsPath)) {
             JsonObject settings = new Gson().fromJson(new FileReader(settingsPath.toFile()), JsonObject.class);
@@ -57,7 +55,7 @@ public class FactorioModManagerApplication extends Application {
         settingsStage.setScene(new Scene(settingsRoot));
         settingsWindowController.setWindow(settingsStage);
         //pristine setup
-        //check if all the nececssary directories have been set
+        //check if all the necessary directories have been set
         if (store.getFactorioApplication() == null || store.getDataDir() == null) {
             settingsStage.show();
             settingsWindowController.setOnClose(() -> {
@@ -80,7 +78,10 @@ public class FactorioModManagerApplication extends Application {
             Files.createDirectory(store.getFMMDir());
             Files.move(store.getModDir(), store.getFMMDir().resolve("default"));
         }
-        store.scanDirectory(store.getFMMDir());
+        if (!Files.exists(store.getFMMDir().resolve("mods"))) {
+            Files.createDirectory(store.getFMMDir().resolve("mods"));
+        }
+        store.scanDirectory();
 
         Parent root = FXMLLoader.load(getClass().getResource("/modpackwindow.fxml"), null, new JavaFXBuilderFactory(), clazz -> new ModpackListWindowController(settingsStage));
         primaryStage.setTitle("Factorio Modpacks");
