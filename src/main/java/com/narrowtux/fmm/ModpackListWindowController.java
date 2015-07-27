@@ -1,13 +1,17 @@
 package com.narrowtux.fmm;
 
+import com.narrowtux.fmm.gui.ConsoleWindow;
+import com.narrowtux.fmm.model.Mod;
+import com.narrowtux.fmm.model.ModReference;
+import com.narrowtux.fmm.model.Modpack;
+import com.narrowtux.fmm.model.Save;
+import com.narrowtux.fmm.model.Version;
 import javafx.application.Platform;
 import javafx.beans.property.*;
-import javafx.collections.ListChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,22 +19,18 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
-import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import javafx.util.StringConverter;
 import javafx.util.converter.DefaultStringConverter;
 
 import java.awt.*;
 import java.io.IOException;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 
 public class ModpackListWindowController {
     @FXML
@@ -48,6 +48,7 @@ public class ModpackListWindowController {
     @FXML
     TabPane tabPane;
 
+    ConsoleWindow consoleWindow = new ConsoleWindow();
     private Datastore store = Datastore.getInstance();
 
     public ModpackListWindowController(Stage settingsStage) {
@@ -186,7 +187,7 @@ public class ModpackListWindowController {
                         pane.setPadding(new Insets(0, 10, 0, 10));
                         ImageView screenshot = new ImageView(save.getScreenshot());
                         screenshot.setPreserveRatio(true);
-                        screenshot.setFitWidth(64);
+                        screenshot.setFitWidth(75);
                         pane.add(screenshot, 0, 0, 1, 2);
                         Label name = new Label(save.getName());
                         Label fileName = new Label(save.getPath().getFileName().toString());
@@ -271,7 +272,7 @@ public class ModpackListWindowController {
             pack = ((Modpack) o);
         }
         if (pack != null) {
-            ModpackInstaller installer = new ModpackInstaller(pack);
+            ModsInstaller installer = new ModpackInstaller(pack);
             progress.setVisible(true);
             playButton.setDisable(true);
             progress.progressProperty().bind(installer.progressProperty());
@@ -282,6 +283,11 @@ public class ModpackListWindowController {
             installer.setOnError((e) -> {
                 progress.setVisible(false);
                 playButton.setDisable(false);
+            });
+            installer.valueProperty().addListener((obj, ov, nv) -> {
+                if (nv != null) {
+                    consoleWindow.getProcesses().add(nv);
+                }
             });
 
             TaskService.getInstance().getTasks().add(installer);
@@ -307,10 +313,27 @@ public class ModpackListWindowController {
             Modpack pack = new Modpack(name, path);
             store.getModpacks().add(pack);
             modpacks.getSelectionModel().selectLast();
-            modpacks.edit(modpacks.getSelectionModel().getSelectedIndex(), nameColumn);
+            Platform.runLater(() -> modpacks.edit(modpacks.getSelectionModel().getSelectedIndex(), nameColumn));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+    }
+
+    @FXML
+    public void onPlaySavePressed(ActionEvent actionEvent) {
+        Save selected = saves.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            ModsInstaller installer = new SavegameInstaller(selected);
+
+            TaskService.getInstance().getTasks().add(installer);
+        } else {
+            System.err.println("No save selected");
+        }
+    }
+
+    @FXML
+    public void onConsoleAction(ActionEvent event) {
+        consoleWindow.show();
     }
 }

@@ -1,4 +1,4 @@
-package com.narrowtux.fmm;
+package com.narrowtux.fmm.model;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -10,7 +10,7 @@ public class ModReference {
     private ObjectProperty<Modpack> modpack = new SimpleObjectProperty<>();
     private BooleanProperty enabled = new SimpleBooleanProperty(true);
 
-    ModReference(Mod mod, Modpack modpack, boolean enabled) {
+    public ModReference(Mod mod, Modpack modpack, boolean enabled) {
         this.mod.set(mod);
         this.modpack.set(modpack);
         this.enabled.set(enabled);

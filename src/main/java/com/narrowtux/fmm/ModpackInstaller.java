@@ -1,87 +1,35 @@
 package com.narrowtux.fmm;
 
-import javafx.application.Platform;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.concurrent.Task;
-import javafx.scene.control.TreeItem;
+import com.narrowtux.fmm.model.ModReference;
+import com.narrowtux.fmm.model.Modpack;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.Collection;
 
-public class ModpackInstaller extends Task<Void> {
-    private Modpack modpack;
-    private Optional<Runnable> onDone;
-    private Optional<Consumer<Exception>> onError;
+public class ModpackInstaller extends ModsInstaller {
+    private final Modpack modpack;
 
-    public ModpackInstaller(Modpack modpack) {
-        this.modpack = modpack;
+    public ModpackInstaller(Modpack pack) {
+        super();
+        this.modpack = pack;
     }
 
     @Override
-    protected Void call() throws Exception {
-        try {
-            int steps = 5 + modpack.getMods().size();
-            int step = 0;
-            updateProgress(step, steps);
-            Path tmp = null;
-            if (Files.exists(Datastore.getInstance().getModDir())) {
-                updateMessage("Backing up old mods directory");
-                tmp = Datastore.getInstance().getDataDir().resolve("tmp");
-                Files.move(Datastore.getInstance().getModDir(), tmp);
-                updateProgress(++step, steps);
-            }
-            updateProgress(++step, steps);
-            updateMessage("Creating new mods directory");
-            Files.createDirectory(Datastore.getInstance().getModDir());
+    protected Collection<ModReference> getMods() {
+        return modpack.getMods();
+    }
 
-            updateMessage("Writing mod-list.json");
-            Files.copy(modpack.getPath().resolve("mod-list.json"), Datastore.getInstance().getModDir().resolve("mod-list.json"));
-            updateProgress(++step, steps);
-            for (ModReference mod : modpack.getMods()) {
-                updateMessage("Installing mod " + mod.getMod().toSimpleString());
-                Files.copy(mod.getMod().getPath(), Datastore.getInstance().getModDir().resolve(mod.getMod().getPath().getFileName()));
-                updateProgress(++step, steps);
-            }
-
-            updateMessage("Removing backup");
-            if (tmp != null) {
-                Files.walkFileTree(tmp, new FileDeleter());
-                updateProgress(++step, steps);
-            }
-
-            updateMessage("Launching factorio");
-            if (OSValidator.isMac()) {
-                Runtime.getRuntime().exec(new String[]{"open", Datastore.getInstance().getFactorioApplication().toString()});
-            } else {
-                Runtime.getRuntime().exec(Datastore.getInstance().getFactorioApplication().toString());
-            }
-            updateProgress(++step, steps);
-            onDone.ifPresent(Platform::runLater);
-        } catch (IOException e) {
-            e.printStackTrace();
-            onError.ifPresent(consumer -> Platform.runLater(() -> consumer.accept(e)));
+    @Override
+    protected Process startFactorio() throws IOException {
+        Process process = null;
+        Path application = Datastore.getInstance().getFactorioApplication();
+        if (OSValidator.isMac()) {
+            application = application.resolve("Contents/MacOS/factorio");
         }
-        return null;
-    }
+        process = Runtime.getRuntime().exec(application.toAbsolutePath().toString());
 
-    public Optional<Consumer<Exception>> getOnError() {
-        return onError;
-    }
-
-    public void setOnError(Consumer<Exception> onError) {
-        this.onError = Optional.ofNullable(onError);
-    }
-
-    public Optional<Runnable> getOnDone() {
-        return onDone;
-    }
-
-    public void setOnDone(Runnable onDone) {
-        this.onDone = Optional.ofNullable(onDone);
+        return process;
     }
 }

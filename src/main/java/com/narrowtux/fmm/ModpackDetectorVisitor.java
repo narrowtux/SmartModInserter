@@ -1,6 +1,10 @@
 package com.narrowtux.fmm;
 
 import com.google.gson.Gson;
+import com.narrowtux.fmm.model.Mod;
+import com.narrowtux.fmm.model.ModReference;
+import com.narrowtux.fmm.model.Modpack;
+import com.narrowtux.fmm.model.Version;
 
 import java.io.*;
 import java.nio.file.FileVisitResult;

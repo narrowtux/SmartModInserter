@@ -1,6 +1,8 @@
-package com.narrowtux.fmm;
+package com.narrowtux.fmm.model;
 
 import com.google.common.io.LittleEndianDataInputStream;
+import com.narrowtux.fmm.Datastore;
+import com.narrowtux.fmm.Util;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;

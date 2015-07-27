@@ -1,4 +1,4 @@
-package com.narrowtux.fmm;
+package com.narrowtux.fmm.model;
 
 import javafx.beans.property.*;
 

@@ -1,26 +1,18 @@
-package com.narrowtux.fmm;
+package com.narrowtux.fmm.model;
 
 import com.google.gson.*;
-import com.google.gson.internal.Excluder;
-import com.google.gson.stream.JsonWriter;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
-import javafx.scene.control.TreeItem;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 
 public class Modpack {
     private StringProperty name = new SimpleStringProperty();
