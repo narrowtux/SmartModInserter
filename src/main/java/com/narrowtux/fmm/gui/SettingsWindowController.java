@@ -3,16 +3,14 @@ package com.narrowtux.fmm.gui;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
-import com.narrowtux.fmm.Datastore;
+import com.narrowtux.fmm.model.Datastore;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import javafx.stage.WindowEvent;
 
 import java.io.File;
 import java.io.FileWriter;

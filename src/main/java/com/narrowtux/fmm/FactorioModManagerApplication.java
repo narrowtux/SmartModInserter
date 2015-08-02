@@ -1,12 +1,13 @@
 package com.narrowtux.fmm;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import com.narrowtux.fmm.dirwatch.SimpleDirectoryWatchService;
+import com.narrowtux.fmm.io.dirwatch.SimpleDirectoryWatchService;
 import com.narrowtux.fmm.gui.MainWindowController;
 import com.narrowtux.fmm.gui.SettingsWindowController;
+import com.narrowtux.fmm.model.Datastore;
+import com.narrowtux.fmm.util.OS;
+import com.narrowtux.fmm.util.Util;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -31,12 +32,12 @@ public class FactorioModManagerApplication extends Application {
             });
 
             Datastore store = new Datastore();
-            if (OSValidator.isMac()) {
+            if (OS.isMac()) {
                 Path applicationSupport = Paths.get(System.getenv("HOME"), "Library/Application Support/");
                 store.setDataDir(applicationSupport.resolve("factorio/"));
                 store.setFactorioApplication(Paths.get("/Applications/factorio.app"));
                 store.setStorageDir(applicationSupport.resolve("FactorioModManager/"));
-            } else if (OSValidator.isWindows()) {
+            } else if (OS.isWindows()) {
                 Path appData = Paths.get(System.getenv("AppData"));
                 store.setDataDir(appData.resolve("factorio"));
                 store.setStorageDir(appData.resolve("FactorioModManager"));

@@ -1,45 +1,19 @@
 package com.narrowtux.fmm.gui;
 
-import com.narrowtux.fmm.Datastore;
-import com.narrowtux.fmm.ModDownloadTask;
-import com.narrowtux.fmm.ModpackInstaller;
-import com.narrowtux.fmm.ModsInstaller;
-import com.narrowtux.fmm.SavegameInstaller;
-import com.narrowtux.fmm.TaskService;
-import com.narrowtux.fmm.Util;
-import com.narrowtux.fmm.gui.ConsoleWindow;
-import com.narrowtux.fmm.model.Mod;
-import com.narrowtux.fmm.model.ModReference;
-import com.narrowtux.fmm.model.Modpack;
-import com.narrowtux.fmm.model.Save;
+import com.narrowtux.fmm.model.Datastore;
+import com.narrowtux.fmm.io.tasks.ModDownloadTask;
+import com.narrowtux.fmm.io.tasks.TaskService;
+import com.narrowtux.fmm.util.Util;
 import com.narrowtux.fmm.model.Version;
-import javafx.animation.Animation;
-import javafx.application.Platform;
-import javafx.beans.binding.DoubleExpression;
-import javafx.beans.property.*;
 import javafx.collections.ListChangeListener;
-import javafx.collections.SetChangeListener;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.cell.CheckBoxTreeTableCell;
-import javafx.scene.control.cell.TextFieldTreeTableCell;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.shape.Arc;
 import javafx.stage.Stage;
-import javafx.util.Callback;
-import javafx.util.converter.DefaultStringConverter;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.TaskProgressView;
 
@@ -47,7 +21,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.*;
 
 public class MainWindowController extends Controller {
     @FXML
@@ -150,11 +123,6 @@ public class MainWindowController extends Controller {
             lastGlobalProgressUpdate = System.currentTimeMillis();
         }
     }
-
-
-
-
-
 
     @FXML
     public void onOpenDataFolderClicked() throws IOException {

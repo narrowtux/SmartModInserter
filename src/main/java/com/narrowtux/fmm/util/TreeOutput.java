@@ -1,4 +1,4 @@
-package com.narrowtux.fmm;
+package com.narrowtux.fmm.util;
 
 public class TreeOutput {
     private int currentTabs = 0;

@@ -1,4 +1,4 @@
-package com.narrowtux.fmm;
+package com.narrowtux.fmm.io.tasks;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;

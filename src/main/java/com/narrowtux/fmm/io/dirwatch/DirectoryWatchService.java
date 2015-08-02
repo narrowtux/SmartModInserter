@@ -1,4 +1,4 @@
-package com.narrowtux.fmm.dirwatch;
+package com.narrowtux.fmm.io.dirwatch;
 
 import java.io.IOException;
 

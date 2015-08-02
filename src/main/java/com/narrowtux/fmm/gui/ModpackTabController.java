@@ -1,9 +1,9 @@
 package com.narrowtux.fmm.gui;
 
-import com.narrowtux.fmm.Datastore;
-import com.narrowtux.fmm.ModpackInstaller;
-import com.narrowtux.fmm.ModsInstaller;
-import com.narrowtux.fmm.TaskService;
+import com.narrowtux.fmm.model.Datastore;
+import com.narrowtux.fmm.io.tasks.ModpackInstaller;
+import com.narrowtux.fmm.io.tasks.ModsInstaller;
+import com.narrowtux.fmm.io.tasks.TaskService;
 import com.narrowtux.fmm.model.Mod;
 import com.narrowtux.fmm.model.ModReference;
 import com.narrowtux.fmm.model.Modpack;
@@ -12,7 +12,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;

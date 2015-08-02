@@ -1,11 +1,8 @@
-package com.narrowtux.fmm;
+package com.narrowtux.fmm.model;
 
-import com.narrowtux.fmm.dirwatch.DirectoryWatchService;
-import com.narrowtux.fmm.dirwatch.SimpleDirectoryWatchService;
-import com.narrowtux.fmm.model.Mod;
-import com.narrowtux.fmm.model.Modpack;
-import com.narrowtux.fmm.model.Save;
-import com.narrowtux.fmm.model.Version;
+import com.narrowtux.fmm.io.dirwatch.DirectoryWatchService;
+import com.narrowtux.fmm.io.dirwatch.SimpleDirectoryWatchService;
+import com.narrowtux.fmm.io.ModpackDetectorVisitor;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;

@@ -1,10 +1,11 @@
-package com.narrowtux.fmm;
+package com.narrowtux.fmm.io.tasks;
 
+import com.narrowtux.fmm.model.Datastore;
+import com.narrowtux.fmm.util.OS;
 import com.narrowtux.fmm.model.ModReference;
 import com.narrowtux.fmm.model.Save;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -28,7 +29,7 @@ public class SavegameInstaller extends ModsInstaller {
     @Override
     protected Process startFactorio() throws IOException {
         Process process = null;
-        if (OSValidator.isMac()) {
+        if (OS.isMac()) {
             process = Runtime.getRuntime().exec(new String[]{"open", Datastore.getInstance().getFactorioApplication().toString(), "--args", "--mp-load-game", savegame.getPath().getFileName().toString()});
         } else {
             process = Runtime.getRuntime().exec(Datastore.getInstance().getFactorioApplication().toString());

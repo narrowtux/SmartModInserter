@@ -1,12 +1,13 @@
-package com.narrowtux.fmm;
+package com.narrowtux.fmm.io.tasks;
 
+import com.narrowtux.fmm.model.Datastore;
+import com.narrowtux.fmm.io.FileDeleter;
 import com.narrowtux.fmm.model.ModReference;
 import com.narrowtux.fmm.model.Modpack;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;

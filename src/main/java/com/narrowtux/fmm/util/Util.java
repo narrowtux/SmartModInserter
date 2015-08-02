@@ -1,4 +1,4 @@
-package com.narrowtux.fmm;
+package com.narrowtux.fmm.util;
 
 import com.google.common.io.LittleEndianDataInputStream;
 import com.narrowtux.fmm.gui.Controller;

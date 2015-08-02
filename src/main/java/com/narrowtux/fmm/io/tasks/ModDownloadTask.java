@@ -1,16 +1,16 @@
-package com.narrowtux.fmm;
+package com.narrowtux.fmm.io.tasks;
 
+import com.narrowtux.fmm.model.Datastore;
+import com.narrowtux.fmm.io.ModpackDetectorVisitor;
+import com.narrowtux.fmm.util.Util;
 import com.narrowtux.fmm.model.Mod;
 import com.narrowtux.fmm.model.Version;
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.jscience.physics.amount.Amount;
 
 import javax.measure.quantity.DataAmount;
 import javax.measure.unit.NonSI;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;

@@ -1,12 +1,11 @@
 package com.narrowtux.fmm.gui;
 
-import com.narrowtux.fmm.Datastore;
+import com.narrowtux.fmm.model.Datastore;
 import com.narrowtux.fmm.model.Mod;
 import com.narrowtux.fmm.model.ModReference;
 import com.narrowtux.fmm.model.Modpack;
 import com.narrowtux.fmm.model.Version;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;

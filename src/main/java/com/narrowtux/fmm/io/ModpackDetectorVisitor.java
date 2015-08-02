@@ -1,6 +1,8 @@
-package com.narrowtux.fmm;
+package com.narrowtux.fmm.io;
 
 import com.google.gson.Gson;
+import com.narrowtux.fmm.model.Datastore;
+import com.narrowtux.fmm.util.TreeOutput;
 import com.narrowtux.fmm.model.Mod;
 import com.narrowtux.fmm.model.ModReference;
 import com.narrowtux.fmm.model.Modpack;
@@ -23,7 +25,7 @@ import java.util.zip.ZipInputStream;
 /**
  * Created by tux on 06.07.15.
  */
-class ModpackDetectorVisitor implements FileVisitor<Path> {
+public class ModpackDetectorVisitor implements FileVisitor<Path> {
     private Modpack currentModpack;
     private Collection<Modpack> modpacks;
     private Datastore store = Datastore.getInstance();

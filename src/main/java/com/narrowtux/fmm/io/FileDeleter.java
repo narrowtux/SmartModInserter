@@ -1,4 +1,4 @@
-package com.narrowtux.fmm;
+package com.narrowtux.fmm.io;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;

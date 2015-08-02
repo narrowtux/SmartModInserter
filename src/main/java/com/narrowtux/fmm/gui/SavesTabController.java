@@ -1,14 +1,13 @@
 package com.narrowtux.fmm.gui;
 
-import com.narrowtux.fmm.Datastore;
-import com.narrowtux.fmm.ModsInstaller;
-import com.narrowtux.fmm.SavegameInstaller;
-import com.narrowtux.fmm.TaskService;
+import com.narrowtux.fmm.model.Datastore;
+import com.narrowtux.fmm.io.tasks.ModsInstaller;
+import com.narrowtux.fmm.io.tasks.SavegameInstaller;
+import com.narrowtux.fmm.io.tasks.TaskService;
 import com.narrowtux.fmm.model.Save;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
