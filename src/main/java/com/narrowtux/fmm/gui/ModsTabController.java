@@ -5,6 +5,8 @@ import com.narrowtux.fmm.model.Mod;
 import com.narrowtux.fmm.model.ModReference;
 import com.narrowtux.fmm.model.Modpack;
 import com.narrowtux.fmm.model.Version;
+import javafx.application.Platform;
+import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
@@ -15,6 +17,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.AnchorPane;
+
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class ModsTabController extends TabController {
     private final Datastore store;
@@ -29,7 +34,6 @@ public class ModsTabController extends TabController {
     TableColumn<Mod, Version> modsVersionColumn;
     @FXML
     TableColumn<Mod, Double> modsProgressColumn;
-    ContextMenu currentMenu = null;
 
     public ModsTabController() {
         store = Datastore.getInstance();
@@ -40,8 +44,8 @@ public class ModsTabController extends TabController {
         return tab;
     }
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void init() {
         tab.setContent(root);
         mods.setItems(store.getMods());
 
@@ -49,37 +53,36 @@ public class ModsTabController extends TabController {
         modsVersionColumn.setCellValueFactory(features -> features.getValue().versionProperty());
 
         mods.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-    }
 
-
-    @FXML
-    public void onModsContext(ContextMenuEvent event) {
-        if (currentMenu != null) {
-            currentMenu.hide();
-        }
         ContextMenu menu = new ContextMenu();
 
         Menu add = new Menu("Add to modpack ...");
-        for (final Modpack pack : store.getModpacks()) {
+        Consumer<Modpack> onModpackAdded = (pack -> {
             MenuItem packItem = new MenuItem(pack.getName());
             packItem.setOnAction(actionEvent -> {
-                for (Mod mod : mods.getSelectionModel().getSelectedItems()) {
-                    if (!pack.getMods().stream().filter(ref -> ref.getMod().equals(mod)).findAny().isPresent()) {
-                        pack.getMods().add(new ModReference(mod, pack, true));
-                    }
-                }
+                mods.getSelectionModel().getSelectedItems().stream().filter(mod -> !pack.getMods().stream().filter(ref -> ref.getMod().equals(mod)).findAny().isPresent()).forEach(mod -> {
+                    pack.getMods().add(new ModReference(mod, pack, true));
+                });
                 pack.writeModList(true);
             });
-            add.getItems().add(packItem);
-        }
+            Platform.runLater(() -> add.getItems().add(packItem));
+        });
+        store.getModpacks().forEach(onModpackAdded);
+        store.getModpacks().addListener((SetChangeListener<Modpack>) change -> {
+            if (change.wasAdded()) {
+                onModpackAdded.accept(change.getElementAdded());
+            }
+            if (change.wasRemoved()) {
+                Modpack removed = change.getElementRemoved();
+                add.getItems().removeAll(add.getItems().stream().filter(item -> item.getText().equals(removed.getName())).collect(Collectors.toList()));
+            }
+        });
 
         menu.getItems().add(add);
 
         MenuItem delete = new MenuItem("Delete");
 
         menu.getItems().add(delete);
-
-        currentMenu = menu;
-        menu.show(mods, event.getScreenX(), event.getScreenY());
+        mods.setContextMenu(menu);
     }
 }

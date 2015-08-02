@@ -2,6 +2,16 @@ package com.narrowtux.fmm.util;
 
 public class TreeOutput {
     private int currentTabs = 0;
+    private boolean muted = false;
+
+    public boolean isMuted() {
+        return muted;
+    }
+
+    public TreeOutput setMuted(boolean muted) {
+        this.muted = muted;
+        return this;
+    }
 
     public void push() {
         currentTabs++;
@@ -12,7 +22,9 @@ public class TreeOutput {
     }
 
     public void println(String text) {
-        System.out.println(getTabs() + text);
+        if (!isMuted()) {
+            System.out.println(getTabs() + text);
+        }
     }
 
     private String getTabs() {

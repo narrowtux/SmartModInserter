@@ -51,8 +51,8 @@ public class MainWindowController extends Controller {
     @FXML
     AnchorPane root;
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void init() {
         progressPopover.setArrowLocation(PopOver.ArrowLocation.TOP_RIGHT);
         globalProgress.startAngleProperty().bind(globalProgress.lengthProperty().negate().add(90));
         globalProgress.setLength(360);
@@ -80,17 +80,17 @@ public class MainWindowController extends Controller {
         }
 
         // load all the tabs
-        ModsTabController modsTabController = new ModsTabController();
-        ModpackTabController modpackTabController = new ModpackTabController(consoleWindow);
-        SavesTabController savesTabController = new SavesTabController();
+        ModsTabController modsTabController;
+        ModpackTabController modpackTabController;
+        SavesTabController savesTabController;
         try {
-            Util.loadFXML("/modstab.fxml", modsTabController);
-            Util.loadFXML("/modpackstab.fxml", modpackTabController);
-            Util.loadFXML("/savestab.fxml", savesTabController);
+            modsTabController = Util.loadFXML(GuiFiles.MODS_TAB, () -> new ModsTabController()).getController();
+            modpackTabController = Util.loadFXML(GuiFiles.MODPACKS_TAB, () -> new ModpackTabController(consoleWindow)).getController();
+            savesTabController = Util.loadFXML(GuiFiles.SAVES_TAB, () -> new SavesTabController()).getController();
 
             tabPane.getTabs().addAll(modsTabController.getTab(), modpackTabController.getTab(), savesTabController.getTab());
             tabPane.getSelectionModel().select(modpackTabController.getTab());
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -147,26 +147,6 @@ public class MainWindowController extends Controller {
             progressPopover.hide();
         } else {
             progressPopover.show(globalProgressButton);
-
-            Task task = new Task() {
-                @Override
-                protected Object call() throws Exception {
-                    int progress = 0;
-                    int total = 6000;
-                    updateTitle("Super important task");
-                    updateMessage("waiting 1 seconds");
-                    updateProgress(-1, 1);
-                    Thread.sleep(1000);
-                    while (progress != total) {
-                        updateProgress(progress, total);
-                        updateMessage("AH + " + progress);
-                        progress++;
-                        Thread.sleep(10);
-                    }
-                    return null;
-                }
-            };
-            TaskService.getInstance().getTasks().add(task);
         }
     }
 }

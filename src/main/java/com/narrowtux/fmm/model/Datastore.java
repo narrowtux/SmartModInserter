@@ -3,11 +3,14 @@ package com.narrowtux.fmm.model;
 import com.narrowtux.fmm.io.dirwatch.DirectoryWatchService;
 import com.narrowtux.fmm.io.dirwatch.SimpleDirectoryWatchService;
 import com.narrowtux.fmm.io.ModpackDetectorVisitor;
+import com.narrowtux.fmm.io.tasks.TaskService;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
+import javafx.concurrent.Task;
 
 import java.io.*;
 import java.nio.file.*;
@@ -17,10 +20,6 @@ import java.util.LinkedHashSet;
 public class Datastore {
     //singleton stuff
     private static Datastore instance;
-
-    {
-        instance = this;
-    }
 
     public static Datastore getInstance() {
         return instance;
@@ -32,9 +31,10 @@ public class Datastore {
     private ObjectProperty<Path> factorioApplication = new SimpleObjectProperty<>();
     private ObjectProperty<Path> storageDir = new SimpleObjectProperty<>();
     private ObservableList<Save> saves = FXCollections.observableArrayList();
-    private FileVisitor<Path> fmmScaner = new ModpackDetectorVisitor(getModpacks());
+    private FileVisitor<Path> fmmScaner = new ModpackDetectorVisitor(getModpacks(), this);
 
     public Datastore() {
+        instance = this;
         mods.add(new Mod("base", null, null));
         SimpleDirectoryWatchService.getInstance().start();
         dataDirProperty().addListener((obj, ov, nv) -> {
@@ -75,23 +75,46 @@ public class Datastore {
     }
 
     public void scanDirectory() throws IOException {
-        Path path = getFMMDir();
-        Files.walk(path.resolve("mods")).filter(p -> Files.isRegularFile(p)).filter(p -> p.getFileName().toString().endsWith(".zip"))
-                .forEach(modZipFile -> {
-                    try {
-                        Mod mod = ModpackDetectorVisitor.parseMod(modZipFile);
-                        getMods().add(mod);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-        Files.walkFileTree(path, fmmScaner);
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                try {
+                    updateTitle("Scanning");
+                    Path path = getFMMDir();
+                    updateProgress(0, 3);
+                    updateTitle("Scanning for mods");
+                    Files.walk(path.resolve("mods")).filter(p -> Files.isRegularFile(p)).filter(p -> p.getFileName().toString().endsWith(".zip"))
+                            .forEach(modZipFile -> {
+                                try {
+                                    Mod mod = ModpackDetectorVisitor.parseMod(modZipFile);
+                                    getMods().add(mod);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                    updateProgress(1, 3);
 
-        Files.walk(getDataDir().resolve("saves")).filter(p -> Files.isRegularFile(p)).filter(p -> p.getFileName().toString().endsWith(".zip"))
-                .forEach(saveZipFile -> {
-                    Save save = new Save(saveZipFile);
-                    saves.add(save);
-                });
+                    updateTitle("Scanning for modpacks");
+                    Files.walkFileTree(path, fmmScaner);
+                    updateProgress(2, 3);
+
+                    updateTitle("Scanning for savegames");
+                    Files.walk(getDataDir().resolve("saves"))
+                            .filter(p -> Files.isRegularFile(p))
+                            .filter(p -> p.getFileName().toString().endsWith(".zip"))
+                            .forEach(saveZipFile -> {
+                                Save save = new Save(saveZipFile);
+                                saves.add(save);
+                            });
+                    updateProgress(3, 3);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw e;
+                }
+                return null;
+            }
+        };
+        TaskService.getInstance().submit(task);
     }
 
     public Mod getMod(String name, Version version) {

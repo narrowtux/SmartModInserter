@@ -46,8 +46,8 @@ public class SettingsWindowController extends Controller {
         return root;
     }
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void init() {
         Datastore.getInstance().dataDirProperty().addListener((observableValue, ov, nv) -> {
             updateButton(dataButton, nv);
         });

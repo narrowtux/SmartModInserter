@@ -2,6 +2,9 @@ package com.narrowtux.fmm;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.narrowtux.fmm.gui.GuiFiles;
+import com.narrowtux.fmm.gui.ModsTabController;
+import com.narrowtux.fmm.gui.SavesTabController;
 import com.narrowtux.fmm.io.dirwatch.SimpleDirectoryWatchService;
 import com.narrowtux.fmm.gui.MainWindowController;
 import com.narrowtux.fmm.gui.SettingsWindowController;
@@ -9,6 +12,8 @@ import com.narrowtux.fmm.model.Datastore;
 import com.narrowtux.fmm.util.OS;
 import com.narrowtux.fmm.util.Util;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.application.Preloader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -27,11 +32,19 @@ public class FactorioModManagerApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         try {
+            Datastore store = new Datastore();
+            // preload all GUIs
+            settingsWindowController = new SettingsWindowController();
+            Util.preloadFXML(GuiFiles.SETTINGS_WINDOW, settingsWindowController);
+            Util.preloadFXML(GuiFiles.MAIN_WINDOW);
+            Util.preloadFXML(GuiFiles.SAVES_TAB, new SavesTabController());
+            Util.preloadFXML(GuiFiles.MODS_TAB, new ModsTabController());
+            Util.preloadFXML(GuiFiles.MODPACKS_TAB);
+
             Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
-                System.out.println("Exception in main thread: "+throwable.getMessage());
+                System.out.println("Exception in main thread: " + throwable.getMessage());
             });
 
-            Datastore store = new Datastore();
             if (OS.isMac()) {
                 Path applicationSupport = Paths.get(System.getenv("HOME"), "Library/Application Support/");
                 store.setDataDir(applicationSupport.resolve("factorio/"));
@@ -52,14 +65,10 @@ public class FactorioModManagerApplication extends Application {
                     store.setFactorioApplication(Paths.get(settings.get("executable").getAsString()));
                 }
             }
-            settingsWindowController = new SettingsWindowController();
-            Parent settingsRoot = Util.loadFXML(getClass().getResource("/settingswindow.fxml"), settingsWindowController);
-            settingsStage = new Stage();
-            settingsStage.setScene(new Scene(settingsRoot));
-            settingsWindowController.setWindow(settingsStage);
-            //pristine setup
-            //check if all the necessary directories have been set
+
             if (store.getFactorioApplication() == null || store.getDataDir() == null) {
+                loadSettingsWindow();
+
                 settingsStage.show();
                 settingsWindowController.setOnClose(() -> {
                     try {
@@ -68,14 +77,24 @@ public class FactorioModManagerApplication extends Application {
                         e.printStackTrace();
                     }
                 });
+            } else {
+                if (!Files.exists(store.getStorageDir())) {
+                    Files.createDirectories(store.getStorageDir());
+                }
+
+                continueStartup(primaryStage, store);
             }
-            if (!Files.exists(store.getStorageDir())) {
-                Files.createDirectories(store.getStorageDir());
-            }
-            continueStartup(primaryStage, store);
         } catch (Exception e) {
             e.printStackTrace();
+            throw e;
         }
+    }
+
+    private void loadSettingsWindow() throws IOException {
+        Parent settingsRoot = (Parent) Util.loadFXML(GuiFiles.SETTINGS_WINDOW, () -> settingsWindowController).getNode();
+        settingsStage = new Stage();
+        settingsStage.setScene(new Scene(settingsRoot));
+        settingsWindowController.setWindow(settingsStage);
     }
 
     private void continueStartup(Stage primaryStage, Datastore store) throws IOException {
@@ -89,10 +108,13 @@ public class FactorioModManagerApplication extends Application {
         }
         store.scanDirectory();
 
-        Parent root = Util.loadFXML(getClass().getResource("/mainwindow.fxml"), new MainWindowController(settingsStage));
+        loadSettingsWindow();
+
+        Parent root = (Parent) Util.loadFXML(GuiFiles.MAIN_WINDOW, () -> new MainWindowController(settingsStage)).getNode();
         primaryStage.setTitle("Smart Mod Inserter");
         primaryStage.setScene(new Scene(root, 450, 320));
         primaryStage.show();
+        Util.clearPreloadThreads();
     }
 
     @Override
@@ -104,5 +126,8 @@ public class FactorioModManagerApplication extends Application {
 
     public static void main(String[] args) {
         launch(args);
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            e.printStackTrace();
+        });
     }
 }

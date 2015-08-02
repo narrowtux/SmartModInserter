@@ -63,8 +63,8 @@ public class ModpackTabController extends TabController {
         return tab;
     }
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void init() {
         tab.setContent(root);
 
         for (Modpack modpack : store.getModpacks()) {
@@ -211,7 +211,7 @@ public class ModpackTabController extends TabController {
                 }
             });
 
-            TaskService.getInstance().getTasks().add(installer);
+            TaskService.getInstance().submit(installer);
         }
     }
 

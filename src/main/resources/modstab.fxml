@@ -28,7 +28,7 @@
                 <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
             </padding>
             <children>
-                <TableView fx:id="mods" onContextMenuRequested="#onModsContext" prefWidth="200.0" VBox.vgrow="SOMETIMES" xmlns:fx="http://javafx.com/fxml">
+                <TableView fx:id="mods" prefWidth="200.0" VBox.vgrow="SOMETIMES" xmlns:fx="http://javafx.com/fxml">
                     <columns>
                         <TableColumn fx:id="modsNameColumn" prefWidth="200.0" text="Name" />
                         <TableColumn fx:id="modsVersionColumn" prefWidth="75.0" text="Version" />

@@ -7,6 +7,7 @@ import com.narrowtux.fmm.model.Mod;
 import com.narrowtux.fmm.model.ModReference;
 import com.narrowtux.fmm.model.Modpack;
 import com.narrowtux.fmm.model.Version;
+import javafx.application.Platform;
 
 import java.io.*;
 import java.nio.file.FileVisitResult;
@@ -22,17 +23,15 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-/**
- * Created by tux on 06.07.15.
- */
 public class ModpackDetectorVisitor implements FileVisitor<Path> {
     private Modpack currentModpack;
     private Collection<Modpack> modpacks;
-    private Datastore store = Datastore.getInstance();
-    private TreeOutput out = new TreeOutput();
+    private Datastore store;
+    private TreeOutput out = new TreeOutput().setMuted(true);
 
-    public ModpackDetectorVisitor(Collection<Modpack> modpacks) {
+    public ModpackDetectorVisitor(Collection<Modpack> modpacks, Datastore store) {
         this.modpacks = modpacks;
+        this.store = store;
     }
 
     @Override
@@ -82,7 +81,9 @@ public class ModpackDetectorVisitor implements FileVisitor<Path> {
                 mod.setPath(newPath);
 
                 currentModpack.getMods().add(new ModReference(mod, currentModpack, true));
-                store.getMods().add(mod);
+                Platform.runLater(() -> {
+                    store.getMods().add(mod);
+                });
 
             }
         }
@@ -120,7 +121,7 @@ public class ModpackDetectorVisitor implements FileVisitor<Path> {
                         realMod = store.getMod(name, Version.valueOf(version));
                     }
                     if (realMod == null) {
-                        out.println("could not find mod from mod-list.json: " + name + " version: " + version);
+                        out.println("could not find mod from mod-list.json: " + name + "#" + version);
                     } else {
                         ModReference reference = new ModReference(realMod, currentModpack, enabled);
                         currentModpack.getMods().add(reference);

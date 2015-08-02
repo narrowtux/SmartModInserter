@@ -78,7 +78,6 @@ public class Save {
                                 short minor = in.readShort();
                                 short build = in.readShort();
                                 Version version = new Version(major, minor, build);
-                                System.out.println("Added mod " + modName + "#" + version);
 
                                 Mod mod = Datastore.getInstance().getMod(modName, version);
                                 mods.add(mod);
