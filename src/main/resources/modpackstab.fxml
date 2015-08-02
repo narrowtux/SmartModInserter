@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.shape.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.narrowtux.fmm.gui.ModpackTabController" fx:id="root" prefHeight="200.0" prefWidth="200.0">
+    <children>
+        <VBox id="VBox" alignment="CENTER" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <TreeTableView fx:id="modpacks" editable="true" prefHeight="200.0" prefWidth="200.0" showRoot="false" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TreeTableColumn fx:id="nameColumn" prefWidth="300.0" text="Name" />
+                        <TreeTableColumn fx:id="versionColumn" minWidth="0.0" prefWidth="50.0" text="Version" />
+                        <TreeTableColumn fx:id="enabledColumn" prefWidth="40.0" text="Enabled" />
+                    </columns>
+                </TreeTableView>
+                <HBox alignment="CENTER_RIGHT" maxHeight="-1.0" prefHeight="-1.0" prefWidth="575.0" spacing="7.0">
+                    <children>
+                        <ProgressBar fx:id="progress" prefWidth="200.0" progress="0.0" />
+                        <Button mnemonicParsing="false" onAction="#onModpackAddAction" text="Add" />
+                        <Button fx:id="playButton" mnemonicParsing="false" onAction="#onPlayPressed" text="Play" />
+                    </children>
+                </HBox>
+            </children>
+            <padding>
+                <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+            </padding>
+        </VBox>
+    </children>
+</AnchorPane>

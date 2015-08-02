@@ -2,7 +2,6 @@ package com.narrowtux.fmm;
 
 import com.google.common.io.LittleEndianDataInputStream;
 import com.narrowtux.fmm.gui.Controller;
-import com.narrowtux.fmm.gui.ModpackListWindowController;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Node;
@@ -11,10 +10,7 @@ import javax.measure.quantity.DataAmount;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
-import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.URL;
 
 public class Util {
@@ -28,7 +24,11 @@ public class Util {
         return new String(read);
     }
 
-    public <T extends Controller> Node loadFXML(URL resource, T controller) throws IOException {
+    public static <N extends Node> N loadFXML(URL resource, Controller controller) throws IOException {
         return FXMLLoader.load(resource, null, new JavaFXBuilderFactory(), clazz -> controller);
+    }
+
+    public static <N extends Node> N loadFXML(String resourceUrl, Controller controller) throws IOException {
+        return loadFXML(Util.class.getResource(resourceUrl), controller);
     }
 }
