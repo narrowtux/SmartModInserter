@@ -5,7 +5,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="root" alignment="TOP_RIGHT" maxWidth="-Infinity" prefWidth="415.0" spacing="7.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.narrowtux.fmm.SettingsWindowController">
+<VBox fx:id="root" alignment="TOP_RIGHT" maxWidth="-Infinity" prefWidth="415.0" spacing="7.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.narrowtux.fmm.gui.SettingsWindowController">
    <children>
       <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="7.0">
          <children>

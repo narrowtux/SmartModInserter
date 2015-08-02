@@ -23,6 +23,7 @@ public abstract class ModsInstaller extends Task<Process> {
 
     @Override
     protected Process call() throws Exception {
+        updateTitle("Installing mods and launching factorio");
         Process ret = null;
         try {
             int steps = 5 + getMods().size();

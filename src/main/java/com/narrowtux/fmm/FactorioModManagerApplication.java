@@ -3,6 +3,8 @@ package com.narrowtux.fmm;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.narrowtux.fmm.dirwatch.SimpleDirectoryWatchService;
+import com.narrowtux.fmm.gui.ModpackListWindowController;
+import com.narrowtux.fmm.gui.SettingsWindowController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
@@ -23,6 +25,10 @@ public class FactorioModManagerApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
+            System.out.println("Exception in main thread: "+throwable.getMessage());
+        });
+
         Datastore store = new Datastore();
         if (OSValidator.isMac()) {
             Path applicationSupport = Paths.get(System.getenv("HOME"), "Library/Application Support/");

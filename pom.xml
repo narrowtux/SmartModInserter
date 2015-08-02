@@ -82,5 +82,17 @@
             <artifactId>guava</artifactId>
             <version>17.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.jscience</groupId>
+            <artifactId>jscience</artifactId>
+            <version>4.3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.apple</groupId>
+            <artifactId>AppleJavaExtensions</artifactId>
+            <version>1.4</version>
+        </dependency>
     </dependencies>
 </project>

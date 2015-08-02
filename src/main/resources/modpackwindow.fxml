@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.shape.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -20,7 +21,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane id="AnchorPane" fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="480.0" minWidth="320.0" prefHeight="568.0" prefWidth="603.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.narrowtux.fmm.ModpackListWindowController">
+<AnchorPane id="AnchorPane" fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="480.0" minWidth="320.0" prefHeight="568.0" prefWidth="603.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.narrowtux.fmm.gui.ModpackListWindowController">
     <children>
         <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns:fx="http://javafx.com/fxml">
             <tabs>
@@ -99,12 +100,25 @@
                 </Tab>
             </tabs>
         </TabPane>
-        <MenuButton mnemonicParsing="false" text="Options" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="7.0">
-            <items>
-                <MenuItem mnemonicParsing="false" onAction="#onOpenDataFolderClicked" text="Data Folder ..." />
-                <MenuItem mnemonicParsing="false" onAction="#onSettingsButton" text="Settings ..." />
-            <MenuItem mnemonicParsing="false" onAction="#onConsoleAction" text="Console ..." />
-            </items>
-        </MenuButton>
+      <HBox layoutX="513.0" layoutY="7.0" spacing="7.0" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="7.0">
+         <children>
+            <Button fx:id="globalProgressButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#onProgressAction" text="Progress">
+               <graphic>
+                  <AnchorPane maxHeight="14.0" maxWidth="14.0" minHeight="14.0" minWidth="14.0" prefHeight="14.0" prefWidth="14.0">
+                     <children>
+                        <Arc fx:id="globalProgress" centerX="7.0" centerY="7.0" fill="#a4a4a4" focusTraversable="true" length="170.0" radiusX="7.0" radiusY="7.0" startAngle="-83.3" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" type="ROUND" />
+                     </children>
+                  </AnchorPane>
+               </graphic>
+            </Button>
+              <MenuButton mnemonicParsing="false" text="Options" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="7.0">
+                  <items>
+                      <MenuItem mnemonicParsing="false" onAction="#onOpenDataFolderClicked" text="Data Folder ..." />
+                      <MenuItem mnemonicParsing="false" onAction="#onSettingsButton" text="Settings ..." />
+                  <MenuItem mnemonicParsing="false" onAction="#onConsoleAction" text="Console ..." />
+                  </items>
+              </MenuButton>
+         </children>
+      </HBox>
     </children>
 </AnchorPane>
