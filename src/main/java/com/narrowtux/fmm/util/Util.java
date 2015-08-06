@@ -9,13 +9,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Node;
 
-import javax.measure.quantity.DataAmount;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -23,11 +20,35 @@ import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 public class Util {
-    public static Unit<DataAmount> KILO_BYTES = SI.KILO(NonSI.BYTE);
-    public static Unit<DataAmount> MEGA_BYTES = SI.MEGA(NonSI.BYTE);
     private static HashMap<URL, LoadTask> preloadTasks = new HashMap<>();
     private static HashMap<URL, Node> loaded = new HashMap<>();
     private static ExecutorService executorService = Executors.newCachedThreadPool();
+    private static DecimalFormat[] decimalFormats = {
+            new DecimalFormat("#"), // B
+            new DecimalFormat("#.0"), // KiB
+            new DecimalFormat("#.0"), // MiB
+            new DecimalFormat("#.00"), // GiB
+            new DecimalFormat("#.000"), // TiB
+            new DecimalFormat("#.000"), // PiB
+            new DecimalFormat("#.000"), // EiB
+            new DecimalFormat("#.000"), // ZiB
+            new DecimalFormat("#.000") // YiB
+    };
+    private static String[] binaryIECMultipliers = {
+            "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi"
+    };
+
+    public static String formatBytes(long bytes) {
+        int currentMultiplier = 0;
+        long tmp = bytes;
+        while (tmp >= 1024) {
+            tmp /= 1024;
+            currentMultiplier ++;
+        }
+        double res = (double) bytes / Math.pow(1024, currentMultiplier);
+
+        return decimalFormats[currentMultiplier].format(res) + " " + (currentMultiplier > 0 ? binaryIECMultipliers[currentMultiplier - 1] : "") + "B";
+    }
 
     public static String readString(LittleEndianDataInputStream objectInputStream) throws IOException {
         int size = objectInputStream.readInt();

@@ -6,10 +6,7 @@ import com.narrowtux.fmm.util.Util;
 import com.narrowtux.fmm.model.Mod;
 import com.narrowtux.fmm.model.Version;
 import javafx.concurrent.Task;
-import org.jscience.physics.amount.Amount;
 
-import javax.measure.quantity.DataAmount;
-import javax.measure.unit.NonSI;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
@@ -27,6 +24,8 @@ public class ModDownloadTask extends Task<Mod> {
     private final Version expectedVersion;
     private static Random random = new Random();
     private Path downloadingFile;
+    private long lastUpdate = 0;
+    private long started, ended;
 
     public ModDownloadTask(URL url, String expectedName, Version expectedVersion) {
         this.url = url;
@@ -40,7 +39,11 @@ public class ModDownloadTask extends Task<Mod> {
             updateMessage("Preparing");
             updateProgress(-1, 100);
             updateMessage("Connecting to server");
-            updateTitle("Download: " + url.toString());
+            if (expectedName != null) {
+                updateTitle("Download " + expectedName + (expectedVersion != null ? "#" + expectedVersion.toString() : ""));
+            } else {
+                updateTitle("Download: " + url.toString());
+            }
             URLConnection conn = url.openConnection();
             conn.setConnectTimeout(CONNECT_TIMEOUT);
             conn.setReadTimeout(READ_TIMEOUT);
@@ -48,7 +51,6 @@ public class ModDownloadTask extends Task<Mod> {
             InputStream stream = conn.getInputStream();
             long contentLength = conn.getContentLengthLong();
             updateProgress(0, contentLength);
-            Amount<DataAmount> contentLengthAmount = Amount.valueOf(contentLength, NonSI.BYTE);
             downloadingFile = Datastore.getInstance().getFMMDir().resolve("downloads").resolve("Download-tmp-" + random.nextLong() + ".part");
             Files.createDirectories(downloadingFile.getParent());
             FileOutputStream writer = new FileOutputStream(downloadingFile.toFile());
@@ -56,8 +58,14 @@ public class ModDownloadTask extends Task<Mod> {
             int read = 0;
             long totalRead = 0;
             updateMessage("Downloading");
+            started = System.currentTimeMillis();
             int currentReadingSpeed = 32;
             do {
+                if (isCancelled()) {
+                    updateMessage("Cancelled");
+                    failed();
+                    return null;
+                }
                 read = stream.read(buf, 0, currentReadingSpeed);
 
                 if (currentReadingSpeed < DOWNLOAD_BUFFER_SIZE) {
@@ -65,13 +73,17 @@ public class ModDownloadTask extends Task<Mod> {
                 }
                 if (read > 0) {
                     totalRead += read;
-                    Amount<DataAmount> currentAmount = Amount.valueOf(totalRead, NonSI.BYTE);
                     writer.write(buf, 0, read);
-                    updateMessage("Downloading: " + currentAmount.to(Util.MEGA_BYTES) + " / " + contentLengthAmount.to(Util.MEGA_BYTES));
-                    updateProgress(totalRead, contentLength);
-                    Thread.sleep(10);
+                    if (System.currentTimeMillis() - lastUpdate > 200) {
+                        updateMessage("Downloading: " + Util.formatBytes(totalRead) + " / " + Util.formatBytes(contentLength));
+                        updateProgress(totalRead, contentLength);
+                        lastUpdate = System.currentTimeMillis();
+                    }
                 }
             } while (read > 0);
+            ended = System.currentTimeMillis();
+            updateMessage("Took " + (ended - started) + " ms to download");
+            updateProgress(totalRead, contentLength);
             updateMessage("Installing");
             Mod mod = ModpackDetectorVisitor.parseMod(downloadingFile);
             if (mod == null) {

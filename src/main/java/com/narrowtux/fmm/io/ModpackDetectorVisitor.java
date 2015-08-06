@@ -38,10 +38,10 @@ public class ModpackDetectorVisitor implements FileVisitor<Path> {
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
         out.println("Enter directory " + dir);
         Path modList = dir.resolve("mod-list.json");
-        if (!dir.getFileName().toString().equals("mods") && !Files.exists(modList) && dir.getParent().equals(store.getFMMDir())) {
+        if (!dir.getFileName().toString().equals("mods") && !dir.getFileName().toString().equals("downloads") && !Files.exists(modList) && dir.getParent().equals(store.getFMMDir())) {
             Modpack.writeModList(modList, false);
         }
-        if (!dir.getFileName().toString().equals("mods") && Files.exists(modList)) {
+        if (!dir.getFileName().toString().equals("mods") && !dir.getFileName().toString().equals("downloads") && Files.exists(modList)) {
             currentModpack = modpacks.stream().filter(m -> m.getPath().equals(dir)).findAny().orElseGet(() -> new Modpack(dir.getFileName().toString(), dir));
             out.println("Enter modpack " + currentModpack.getName());
             //remove all mods that are missing in the directory

@@ -1,5 +1,6 @@
 package com.narrowtux.fmm.io.tasks;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -10,6 +11,7 @@ import javafx.concurrent.Task;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 public class TaskService {
     private static TaskService instance;
@@ -42,24 +44,35 @@ public class TaskService {
 
     private TaskService() {
         if (instance != null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Is a singleton");
         }
         instance = this;
     }
 
     public void submit(Task task) {
-        tasks.add(task);
+        Platform.runLater(() -> {
+            tasks.add(task);
+        });
         executorService.submit(task);
     }
 
     public ObservableList<Task> getTasks() {
-        return FXCollections.unmodifiableObservableList(tasks);
+        return tasks;
     }
 
     public static TaskService getInstance() {
         if (instance == null) {
-            return new TaskService();
+            instance = new TaskService();
         }
         return instance;
+    }
+
+    public void shutdown() {
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(3, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

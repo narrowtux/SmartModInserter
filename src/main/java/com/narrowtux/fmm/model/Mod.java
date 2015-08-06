@@ -10,6 +10,7 @@ public class Mod {
     private StringProperty name = new SimpleStringProperty();
     private ObjectProperty<Version> version = new SimpleObjectProperty<>(null);
     private ObjectProperty<Path> path = new SimpleObjectProperty<>();
+    private BooleanProperty unread = new SimpleBooleanProperty(false);
 
     public Mod(String name, Version version, Path path) {
         setName(name);
@@ -72,6 +73,18 @@ public class Mod {
 
     public String toSimpleString() {
         return getName() + '#' + getVersion().toString();
+    }
+
+    public boolean getUnread() {
+        return unread.get();
+    }
+
+    public BooleanProperty unreadProperty() {
+        return unread;
+    }
+
+    public void setUnread(boolean unread) {
+        this.unread.set(unread);
     }
 
     @Override

@@ -82,6 +82,7 @@ public class Save {
                                 Mod mod = Datastore.getInstance().getMod(modName, version);
                                 mods.add(mod);
                             }
+                            break;
                         } else if (zipEntryName.equals("preview.png")) {
                             // read screenshot
                             Image img = new Image(zip);

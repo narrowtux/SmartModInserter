@@ -72,12 +72,6 @@ public class MainWindowController extends Controller {
             }
         });
 
-        try {
-            ModDownloadTask task = new ModDownloadTask(new URL("file:///Users/tux/Downloads/FARL_0.2.8.zip"), "FARL", Version.valueOf("0.2.8"));
-            //TaskService.getInstance().getTasks().add(task);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
 
         // load all the tabs
         ModsTabController modsTabController;

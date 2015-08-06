@@ -5,17 +5,23 @@ import com.google.gson.JsonObject;
 import com.narrowtux.fmm.gui.GuiFiles;
 import com.narrowtux.fmm.gui.ModsTabController;
 import com.narrowtux.fmm.gui.SavesTabController;
+import com.narrowtux.fmm.io.URISchemeHandler;
 import com.narrowtux.fmm.io.dirwatch.SimpleDirectoryWatchService;
 import com.narrowtux.fmm.gui.MainWindowController;
 import com.narrowtux.fmm.gui.SettingsWindowController;
+import com.narrowtux.fmm.io.tasks.TaskService;
 import com.narrowtux.fmm.model.Datastore;
 import com.narrowtux.fmm.util.OS;
+import com.narrowtux.fmm.util.OSXAppleEventHelper;
 import com.narrowtux.fmm.util.Util;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.application.Preloader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.stage.Stage;
 
 import java.io.FileReader;
@@ -23,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 
 public class FactorioModManagerApplication extends Application {
 
@@ -32,6 +39,10 @@ public class FactorioModManagerApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         try {
+            Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
+                System.out.println("Exception in main thread: " + throwable.getMessage());
+            });
+
             Datastore store = new Datastore();
             // preload all GUIs
             settingsWindowController = new SettingsWindowController();
@@ -41,9 +52,9 @@ public class FactorioModManagerApplication extends Application {
             Util.preloadFXML(GuiFiles.MODS_TAB, new ModsTabController());
             Util.preloadFXML(GuiFiles.MODPACKS_TAB);
 
-            Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
-                System.out.println("Exception in main thread: " + throwable.getMessage());
-            });
+            URISchemeHandler schemeHandler = new URISchemeHandler();
+            schemeHandler.start(getParameters().getRaw().toArray(new String[0]));
+
 
             if (OS.isMac()) {
                 Path applicationSupport = Paths.get(System.getenv("HOME"), "Library/Application Support/");
@@ -120,14 +131,12 @@ public class FactorioModManagerApplication extends Application {
     @Override
     public void stop() throws Exception {
         SimpleDirectoryWatchService.getInstance().stop();
+        TaskService.getInstance().shutdown();
         super.stop();
         System.exit(1);
     }
 
     public static void main(String[] args) {
         launch(args);
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-            e.printStackTrace();
-        });
     }
 }

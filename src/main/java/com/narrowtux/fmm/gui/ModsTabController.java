@@ -6,17 +6,29 @@ import com.narrowtux.fmm.model.ModReference;
 import com.narrowtux.fmm.model.Modpack;
 import com.narrowtux.fmm.model.Version;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.ListChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
+import javafx.scene.text.TextAlignment;
 
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -34,6 +46,9 @@ public class ModsTabController extends TabController {
     TableColumn<Mod, Version> modsVersionColumn;
     @FXML
     TableColumn<Mod, Double> modsProgressColumn;
+    StackPane graphic = new StackPane();
+    IntegerProperty unreadMods = new SimpleIntegerProperty(0);
+    private static final int UNREAD_INDICATOR_WIDTH = 14;
 
     public ModsTabController() {
         store = Datastore.getInstance();
@@ -46,10 +61,71 @@ public class ModsTabController extends TabController {
 
     @Override
     public void init() {
+        graphic.setAlignment(Pos.CENTER);
+        //graphic.setMaxSize(UNREAD_INDICATOR_WIDTH, UNREAD_INDICATOR_WIDTH);
+        Circle graphicCircle = new Circle(UNREAD_INDICATOR_WIDTH / 2, Paint.valueOf("red"));
+        Label graphicLabel = new Label();
+        graphicLabel.setTextFill(Paint.valueOf("white"));
+        graphicLabel.textProperty().bind(unreadMods.asString());
+        BooleanBinding unreadVisible = unreadMods.greaterThan(0);
+        graphic.visibleProperty().bind(unreadVisible);
+        graphicCircle.visibleProperty().bind(unreadVisible);
+        graphicLabel.visibleProperty().bind(unreadVisible);
+//        graphicLabel.setTextAlignment(TextAlignment.CENTER);
+//        graphicLabel.setAlignment(Pos.CENTER);
+        graphic.getChildren().addAll(graphicCircle, graphicLabel);
+        tab.setGraphic(graphic);
+        graphicLabel.setPrefWidth(Region.USE_COMPUTED_SIZE);
+        //graphicCircle.setLayoutX(graphicLabel.getLayoutX() + graphicLabel.getWidth() / 2);
+        //graphicCircle.setLayoutY(graphicLabel.getLayoutY() + graphicLabel.getHeight() / 2);
+
+        tab.setOnSelectionChanged(event -> {
+            if (!tab.isSelected()) {
+                store.getMods().stream().filter(Mod::getUnread).forEach(mod -> mod.setUnread(false));
+                unreadMods.set(0);
+            }
+        });
+
+        Datastore.getInstance().getMods().addListener((ListChangeListener<Mod>) change -> {
+            int added = 0;
+            while (change.next()) {
+            }
+            unreadMods.set((int) store.getMods().stream().filter(Mod::getUnread).count());
+        });
+
         tab.setContent(root);
         mods.setItems(store.getMods());
 
         modsNameColumn.setCellValueFactory(features -> features.getValue().nameProperty());
+        modsNameColumn.setCellFactory(column -> {
+            return new TableCell<Mod, String>() {
+                @Override
+                protected void updateItem(String s, boolean empty) {
+                    super.updateItem(s, empty);
+
+                    if (!empty && s != null ) {
+                        try {
+                            Mod mod = (Mod) getTableRow().getItem();
+                            if (mod == null) {
+                                setGraphic(null);
+                                setText(s);
+                                return;
+                            }
+                            Circle circle = new Circle(5, Paint.valueOf("blue"));
+                            circle.setCenterY(circle.getRadius() / 2);
+                            circle.visibleProperty().bind(mod.unreadProperty());
+                            setGraphic(circle);
+                            setText(mod.getName());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        setGraphic(null);
+                        setText(null);
+                    }
+                }
+            };
+        });
         modsVersionColumn.setCellValueFactory(features -> features.getValue().versionProperty());
 
         mods.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);

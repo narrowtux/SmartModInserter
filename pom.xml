@@ -46,6 +46,12 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                        <configuration>
+                        <artifactSet>
+                            <excludes>
+                            </excludes>
+                        </artifactSet>
+                    </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -60,6 +66,23 @@
                         </manifest>
                     </archive>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>sh.tak.appbundler</groupId>
+                <artifactId>appbundle-maven-plugin</artifactId>
+                <version>1.0.4</version>
+                <configuration>
+                    <mainClass>com.narrowtux.fmm.FactorioModManagerApplication</mainClass>
+                    <dictionaryFile>Info.plist</dictionaryFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -83,16 +106,5 @@
             <version>17.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.jscience</groupId>
-            <artifactId>jscience</artifactId>
-            <version>4.3.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.apple</groupId>
-            <artifactId>AppleJavaExtensions</artifactId>
-            <version>1.4</version>
-        </dependency>
     </dependencies>
 </project>
