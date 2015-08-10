@@ -66,7 +66,6 @@ public class URISchemeHandler {
                                 task.valueProperty().addListener((obs, ov, nv) -> {
                                     if (nv != null) {
                                         nv.setUnread(true);
-                                        Datastore.getInstance().getMods().add(nv);
                                     }
                                 });
                                 TaskService.getInstance().submit(task);

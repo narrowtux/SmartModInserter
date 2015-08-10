@@ -1,12 +1,18 @@
 package com.narrowtux.fmm.io;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.narrowtux.fmm.model.Datastore;
+import com.narrowtux.fmm.model.MatchedVersion;
+import com.narrowtux.fmm.model.ModDependency;
 import com.narrowtux.fmm.util.TreeOutput;
 import com.narrowtux.fmm.model.Mod;
 import com.narrowtux.fmm.model.ModReference;
 import com.narrowtux.fmm.model.Modpack;
 import com.narrowtux.fmm.model.Version;
+import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import javafx.application.Platform;
 
 import java.io.*;
@@ -19,6 +25,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -81,10 +89,6 @@ public class ModpackDetectorVisitor implements FileVisitor<Path> {
                 mod.setPath(newPath);
 
                 currentModpack.getMods().add(new ModReference(mod, currentModpack, true));
-                Platform.runLater(() -> {
-                    store.getMods().add(mod);
-                });
-
             }
         }
         return FileVisitResult.CONTINUE;
@@ -137,6 +141,8 @@ public class ModpackDetectorVisitor implements FileVisitor<Path> {
         return FileVisitResult.CONTINUE;
     }
 
+    private static Pattern MOD_DEPENDENCY_PATTERN = Pattern.compile("(\\??)\\s?([a-zA-Z0-9\\-_]+)\\s?(([>=]+)\\s?([0-9\\.]+))?");
+
     public static Mod parseMod(Path file) throws IOException {
         FileInputStream inputStream = new FileInputStream(file.toFile());
         ZipInputStream zipInputStream = new ZipInputStream(inputStream);
@@ -148,8 +154,47 @@ public class ModpackDetectorVisitor implements FileVisitor<Path> {
         }
         if (current != null) {
             Gson gson = new Gson();
-            Map<String, Object> modInfo = gson.fromJson(new InputStreamReader(zipInputStream), Map.class);
-            Mod mod = new Mod(((String) modInfo.get("name")), Version.valueOf((String) modInfo.get("version")), file);
+            JsonObject modInfo = gson.fromJson(new InputStreamReader(zipInputStream), JsonObject.class);
+            String name = modInfo.get("name").getAsString();
+            Version version = Version.valueOf(modInfo.get("version").getAsString());
+
+            Mod mod = Datastore.getInstance().getMod(name, version);
+            mod.setPath(file);
+            try {
+                mod.setTitle(modInfo.get("title").getAsString());
+            } catch (Exception ignored) {}
+            try {
+                mod.setAuthor(modInfo.get("author").getAsString());
+            } catch (Exception ignored) {}
+            try {
+                mod.setContact(modInfo.get("contact").getAsString());
+            } catch (Exception ignored) {}
+            try {
+                mod.setHomepage(modInfo.get("homepage").getAsString());
+            } catch (Exception ignored) {}
+            try {
+                mod.setDescription(modInfo.get("description").getAsString());
+            } catch (Exception ignored) {}
+            JsonElement dependencies1 = modInfo.get("dependencies");
+            if (dependencies1 != null && dependencies1.isJsonArray()) {
+                JsonArray dependencies = dependencies1.getAsJsonArray();
+                for (JsonElement elem : dependencies) {
+                    String depString = elem.getAsString();
+                    Matcher matcher = MOD_DEPENDENCY_PATTERN.matcher(depString);
+                    if (matcher.matches()) {
+                        String optional = matcher.group(1);
+                        String depName = matcher.group(2);
+                        MatchedVersion matchedVersion = null;
+                        if (matcher.group(3) != null) {
+                            matchedVersion = MatchedVersion.valueOf(matcher.group(3));
+                        }
+                        ModDependency dep = new ModDependency(mod, depName, matchedVersion, optional.equals("?"));
+                        mod.getDependencies().add(dep);
+                    } else {
+                        System.out.println("Mod dependency string '" + depString + "' is incorrect.");
+                    }
+                }
+            }
 
             zipInputStream.closeEntry();
             zipInputStream.close();

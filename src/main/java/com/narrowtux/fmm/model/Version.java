@@ -38,7 +38,6 @@ public class Version implements Comparable<Version> {
         if (major != version.major) return false;
         if (minor != version.minor) return false;
         return build == version.build;
-
     }
 
     @Override

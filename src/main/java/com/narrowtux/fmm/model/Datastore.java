@@ -9,12 +9,14 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 import javafx.concurrent.Task;
 
 import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 
 public class Datastore {
@@ -26,7 +28,7 @@ public class Datastore {
     }
 
     private ObservableSet<Modpack> modpacks = FXCollections.observableSet(new LinkedHashSet<>());
-    private ObservableList<Mod> mods = FXCollections.observableList(new ArrayList<>());
+    private ObservableMap<ModKey, Mod> mods = FXCollections.observableMap(new LinkedHashMap<ModKey, Mod>());
     private ObjectProperty<Path> dataDir = new SimpleObjectProperty<>(null);
     private ObjectProperty<Path> factorioApplication = new SimpleObjectProperty<>();
     private ObjectProperty<Path> storageDir = new SimpleObjectProperty<>();
@@ -35,7 +37,6 @@ public class Datastore {
 
     public Datastore() {
         instance = this;
-        mods.add(new Mod("base", null, null));
         SimpleDirectoryWatchService.getInstance().start();
         dataDirProperty().addListener((obj, ov, nv) -> {
             if (nv != null) {
@@ -86,8 +87,7 @@ public class Datastore {
                     Files.walk(path.resolve("mods")).filter(p -> Files.isRegularFile(p)).filter(p -> p.getFileName().toString().endsWith(".zip"))
                             .forEach(modZipFile -> {
                                 try {
-                                    Mod mod = ModpackDetectorVisitor.parseMod(modZipFile);
-                                    getMods().add(mod);
+                                    ModpackDetectorVisitor.parseMod(modZipFile);
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
@@ -118,7 +118,18 @@ public class Datastore {
     }
 
     public Mod getMod(String name, Version version) {
-        return getMods().stream().filter(mod -> mod.getName().equals(name) && version.equals(mod.getVersion())).findAny().orElse(null);
+        ModKey key = new ModKey(name, version);
+        Mod existing = mods.get(key);
+        if (existing == null) {
+            existing = new Mod(name, version, null); // create mod without path. This means this mod is not installed
+            if (Platform.isFxApplicationThread()) {
+                mods.put(key, existing);
+            } else {
+                final Mod finalExisting = existing;
+                Platform.runLater(() -> mods.put(key, finalExisting));
+            }
+        }
+        return existing;
     }
 
     public ObservableSet<Modpack> getModpacks() {
@@ -169,7 +180,7 @@ public class Datastore {
         this.storageDir.set(storageDir);
     }
 
-    public ObservableList<Mod> getMods() {
+    public ObservableMap<ModKey, Mod> getMods() {
         return mods;
     }
 

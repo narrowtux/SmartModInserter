@@ -21,22 +21,47 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.narrowtux.fmm.gui.ModsTabController" fx:id="root" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+<AnchorPane fx:id="root" minHeight="0.0" minWidth="0.0" prefHeight="364.0" prefWidth="619.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="com.narrowtux.fmm.gui.ModsTabController">
     <children>
-        <VBox layoutX="109.0" layoutY="14.0" prefWidth="100.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-            <padding>
-                <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
-            </padding>
-            <children>
-                <TableView fx:id="mods" prefWidth="200.0" VBox.vgrow="SOMETIMES" xmlns:fx="http://javafx.com/fxml">
+      <SplitPane dividerPositions="0.4505672609400324" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <items>
+                <TableView fx:id="mods" prefHeight="364.0">
                     <columns>
                         <TableColumn fx:id="modsNameColumn" prefWidth="200.0" text="Name" />
                         <TableColumn fx:id="modsVersionColumn" prefWidth="75.0" text="Version" />
-                        <TableColumn fx:id="modsProgressColumn" prefWidth="100.0" text="Progress" />
                     </columns>
                 </TableView>
-                <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="7.0" />
-            </children>
-        </VBox>
+            <ScrollPane fx:id="scrollPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+              <content>
+                  <StackPane fx:id="stackPane" alignment="TOP_CENTER">
+                     <children>
+                        <GridPane fx:id="modProperties" hgap="7.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="250.0" vgap="5.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0" />
+                            <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="50.0" />
+                          </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" />
+                           </rowConstraints>
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                        </GridPane>
+                        <Label fx:id="noSelectionLabel" text="No selection">
+                           <StackPane.margin>
+                              <Insets top="50.0" />
+                           </StackPane.margin>
+                        </Label>
+                        <Label fx:id="multiSelectionLabel" text="Multiple mods are selected">
+                           <StackPane.margin>
+                              <Insets top="50.0" />
+                           </StackPane.margin>
+                        </Label>
+                     </children>
+                  </StackPane>
+              </content>
+            </ScrollPane>
+         </items>
+      </SplitPane>
     </children>
 </AnchorPane>

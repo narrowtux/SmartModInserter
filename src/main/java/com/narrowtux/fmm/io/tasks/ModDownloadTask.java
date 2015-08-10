@@ -8,6 +8,7 @@ import com.narrowtux.fmm.model.Version;
 import javafx.concurrent.Task;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
@@ -15,7 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Random;
 
-public class ModDownloadTask extends Task<Mod> {
+public class ModDownloadTask extends Task<Mod> implements Pauseable {
     public static final int DOWNLOAD_BUFFER_SIZE = 4096;
     public static final int CONNECT_TIMEOUT = 5000; // 5 seconds
     public static final int READ_TIMEOUT = 10 * 60 * 1000; // 10 minutes
@@ -111,6 +112,18 @@ public class ModDownloadTask extends Task<Mod> {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    protected void failed() {
+        super.failed();
+
+        // delete part file
+        try {
+            Files.deleteIfExists(downloadingFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
