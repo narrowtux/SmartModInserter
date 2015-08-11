@@ -92,6 +92,8 @@ public class Datastore {
                                     e.printStackTrace();
                                 }
                             });
+                    getMods().put(new ModKey("base", Version.valueOf("0.11.22")), new Mod("base", Version.valueOf("0.11.22"), null));
+                    getMods().put(new ModKey("base", Version.valueOf("0.11.12")), new Mod("base", Version.valueOf("0.11.12"), null));
                     updateProgress(1, 3);
 
                     updateTitle("Scanning for modpacks");

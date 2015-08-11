@@ -85,10 +85,10 @@ public class MatchedVersion {
             case EQUALS:
                 return version.getMajor() == major && version.getMinor() == minor && version.getBuild() == build;
             case GREATER_THAN:
-                if (version.getMajor() <= major) {
+                if (version.getMajor() <= major && minor != null && build != null) {
                     return false;
                 }
-                if (minor != null && version.getMinor() <= minor) {
+                if (minor != null && version.getMinor() <= minor && build != null) {
                     return false;
                 }
                 if (build != null && version.getBuild() <= build) {
@@ -96,10 +96,10 @@ public class MatchedVersion {
                 }
                 return true;
             case GREATER_THAN_OR_EQUALS:
-                if (version.getMajor() < major) {
+                if (version.getMajor() < major && minor != null && build != null) {
                     return false;
                 }
-                if (minor != null && version.getMinor() < minor) {
+                if (minor != null && version.getMinor() < minor && build != null) {
                     return false;
                 }
                 if (build != null && version.getBuild() < build) {

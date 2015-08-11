@@ -14,6 +14,7 @@ import com.narrowtux.fmm.model.Modpack;
 import com.narrowtux.fmm.model.Version;
 import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import javafx.application.Platform;
+import org.sat4j.minisat.SolverFactory;
 
 import java.io.*;
 import java.nio.file.FileVisitResult;
@@ -22,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -133,6 +135,7 @@ public class ModpackDetectorVisitor implements FileVisitor<Path> {
                 }
             }
             currentModpack.writeModList(true);
+            currentModpack.resolveDependencies();
             Datastore.getInstance().getModpacks().add(currentModpack);
             currentModpack = null;
         }
