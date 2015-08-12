@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -133,14 +134,14 @@ public class Modpack {
     public Set<Mod> resolveDependencies() {
         Set<Mod> confirmedMods = getMods().stream().map(ModReference::getMod).collect(Collectors.toSet());
         try {
-            return resolveDependencies(0, SolverFactory.newDefault(), confirmedMods);
+            return resolveDependencies(0, confirmedMods);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public Set<Mod> resolveDependencies(int recursionInterval, ISolver solver, Set<Mod> confirmedMods) throws Exception {
+    public Set<Mod> resolveDependencies(int recursionInterval, Set<Mod> confirmedMods) throws Exception {
         if (recursionInterval > RECURSION_LIMIT) {
             throw new Exception("Recursion limit reached");
         }
@@ -165,75 +166,89 @@ public class Modpack {
             System.out.println(getName() + " No dependencies missing");
             return confirmedMods;
         }
+        ISolver solver = SolverFactory.newDefault();
 
-        solver.reset();
         Set<String> names = deps.stream().map(ModDependency::getDependencyName).collect(Collectors.toSet());
         List<Mod> matchedMods = new LinkedList<>();
         Datastore store = Datastore.getInstance();
-        final boolean[] modNotFound = {false};
-        deps.stream().forEach(dep -> {
-            final int[] found = {0};
-            VecInt clause = new VecInt();
-            store.getMods().values().stream()
-                    .filter(mod -> dep.getMatchedVersion() == null || dep.getMatchedVersion().matches(mod.getVersion()))
-                    .filter(mod -> dep.getDependencyName().equals(mod.getName()))
-                    .forEach(mod -> {
-                        found[0]++;
-                        if (!matchedMods.contains(mod)) {
-                            matchedMods.add(mod);
-                        }
-                        int literal = matchedMods.indexOf(mod) + 1;
-                        if (!clause.contains(literal)) {
-                            clause.push(literal);
-                        }
-                    });
-            if (found[0] == 0) {
-                modNotFound[0] = true;
-                System.out.println(getName() + " couldn't find mod for " + dep);
-            }
-            try {
-                solver.addClause(clause);
-            } catch (ContradictionException e) {
-                e.printStackTrace();
-            }
-        });
-        if (modNotFound[0]) {
-            System.out.println(getName() + " returning null because one or more mods couldn't be found");
-            return null;
-        }
-        System.out.println(getName() + " matched mods: " + matchedMods);
 
-        for (String name : names) {
-            VecInt vector = new VecInt();
-            matchedMods.stream().filter(mod -> mod.getName().equals(name)).forEach(mod -> {
-                int literal = matchedMods.indexOf(mod) + 1;
-                if (!vector.contains(literal)) {
-                    vector.push(literal);
+        for (int interval = 0; interval < RECURSION_LIMIT; interval++) {
+            final boolean[] modNotFound = {false};
+            deps.stream().forEach(dep -> {
+                final int[] found = {0};
+                VecInt clause = new VecInt();
+                store.getMods().values().stream()
+                        .filter(mod -> dep.getMatchedVersion() == null || dep.getMatchedVersion().matches(mod.getVersion()))
+                        .filter(mod -> dep.getDependencyName().equals(mod.getName()))
+                        .forEach(mod -> {
+                            found[0]++;
+                            if (!matchedMods.contains(mod)) {
+                                matchedMods.add(mod);
+                            }
+                            int literal = matchedMods.indexOf(mod) + 1;
+                            if (!clause.contains(literal)) {
+                                clause.push(literal);
+                            }
+                        });
+                if (found[0] == 0) {
+                    modNotFound[0] = true;
+                    System.out.println(getName() + " couldn't find mod for " + dep);
+                }
+                try {
+                    solver.addClause(clause);
+                } catch (ContradictionException e) {
+                    e.printStackTrace();
                 }
             });
-            try {
-                solver.addExactly(vector, 1);
-            } catch (ContradictionException e) {
-                System.out.println(vector);
-                e.printStackTrace();
+            if (modNotFound[0]) {
+                System.out.println(getName() + " returning null because one or more mods couldn't be found");
+                return null;
+            }
+            System.out.println(getName() + " matched mods: " + matchedMods);
+
+            for (String name : names) {
+                VecInt vector = new VecInt();
+                matchedMods.stream().filter(mod -> mod.getName().equals(name)).forEach(mod -> {
+                    int literal = matchedMods.indexOf(mod) + 1;
+                    if (!vector.contains(literal)) {
+                        vector.push(literal);
+                    }
+                });
+                try {
+                    solver.addExactly(vector, 1);
+                } catch (ContradictionException e) {
+                    System.out.println(vector);
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            if (solver.isSatisfiable()) {
+                System.out.println(getName() + " Found solution");
+                Set<Mod> solution = new HashSet<>(confirmedMods);
+                for (int v : solver.model()) {
+                    if (v > 0) {
+                        Mod mod = matchedMods.get(v - 1);
+                        solution.add(mod);
+                        System.out.println(" - " + mod);
+                    }
+                }
+                Set<Mod> result = resolveDependencies(recursionInterval, solution);
+                if (result != null) {
+                    return result;
+                } else {
+                    // try another solution
+                    VecInt block = new VecInt(solver.model());
+                    solver.reset();
+                    solver.addBlockingClause(block);
+                }
+            } else {
+                System.out.println("Didn't find a solution for " + getName());
                 return null;
             }
         }
-
-        if (solver.isSatisfiable()) {
-            System.out.println(getName() + " Found solution");
-            for (int v : solver.model()) {
-                if (v > 0) {
-                    Mod mod = matchedMods.get(v - 1);
-                    confirmedMods.add(mod);
-                    System.out.println(" - " + mod);
-                }
-            }
-            return resolveDependencies(recursionInterval, solver, confirmedMods);
-        } else {
-            System.out.println("Didn't find a solution for " + getName());
-            return null;
-        }
+        System.out.println(getName() + " didn't find solution");
+        return null;
     }
 
     @Override

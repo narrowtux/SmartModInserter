@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import javafx.scene.shape.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
@@ -23,14 +24,21 @@
 
 <AnchorPane fx:id="root" minHeight="0.0" minWidth="0.0" prefHeight="364.0" prefWidth="619.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="com.narrowtux.fmm.gui.ModsTabController">
     <children>
-      <SplitPane dividerPositions="0.4505672609400324" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <SplitPane dividerPositions="0.4878444084278768" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <items>
-                <TableView fx:id="mods" prefHeight="364.0">
-                    <columns>
-                        <TableColumn fx:id="modsNameColumn" prefWidth="200.0" text="Name" />
-                        <TableColumn fx:id="modsVersionColumn" prefWidth="75.0" text="Version" />
-                    </columns>
-                </TableView>
+            <HBox>
+               <children>
+                      <TableView fx:id="mods" maxHeight="1.7976931348623157E308" prefHeight="364.0" SplitPane.resizableWithParent="false">
+                          <columns>
+                              <TableColumn fx:id="modsNameColumn" prefWidth="200.0" text="Name" />
+                              <TableColumn fx:id="modsVersionColumn" prefWidth="75.0" text="Version" />
+                          </columns>
+                      </TableView>
+               </children>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </HBox>
             <ScrollPane fx:id="scrollPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
               <content>
                   <StackPane fx:id="stackPane" alignment="TOP_CENTER">
