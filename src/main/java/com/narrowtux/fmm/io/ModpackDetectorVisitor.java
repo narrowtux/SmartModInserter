@@ -3,7 +3,9 @@ package com.narrowtux.fmm.io;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.narrowtux.fmm.model.Datastore;
 import com.narrowtux.fmm.model.MatchedVersion;
 import com.narrowtux.fmm.model.ModDependency;
@@ -27,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -135,7 +138,10 @@ public class ModpackDetectorVisitor implements FileVisitor<Path> {
                 }
             }
             currentModpack.writeModList(true);
-            currentModpack.resolveDependencies();
+            System.out.println("solutions for " + currentModpack.getName());
+            for (Set<Mod> solution : currentModpack.resolveDependencies()) {
+                System.out.println(" - " + solution);
+            }
             Datastore.getInstance().getModpacks().add(currentModpack);
             currentModpack = null;
         }
@@ -157,7 +163,17 @@ public class ModpackDetectorVisitor implements FileVisitor<Path> {
         }
         if (current != null) {
             Gson gson = new Gson();
-            JsonObject modInfo = gson.fromJson(new InputStreamReader(zipInputStream), JsonObject.class);
+            JsonObject modInfo = null;
+            try {
+                modInfo = gson.fromJson(new InputStreamReader(zipInputStream), JsonObject.class);
+            } catch (JsonSyntaxException e) {
+                System.out.println("for file: " + file.toString());
+                e.printStackTrace();
+                return null;
+            } catch (JsonIOException e) {
+                e.printStackTrace();
+                return null;
+            }
             String name = modInfo.get("name").getAsString();
             Version version = Version.valueOf(modInfo.get("version").getAsString());
 

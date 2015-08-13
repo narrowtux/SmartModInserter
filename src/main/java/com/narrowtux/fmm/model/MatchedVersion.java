@@ -9,7 +9,9 @@ public class MatchedVersion {
     public enum Operator {
         GREATER_THAN(">"),
         GREATER_THAN_OR_EQUALS(">="),
-        EQUALS("==");
+        EQUALS("=="),
+        LESS_THAN("<"),
+        LESS_THAN_OR_EQUALS("<=");
 
         private String value;
 
@@ -76,41 +78,66 @@ public class MatchedVersion {
         if (build != null) {
             builder.append(".");
             builder.append(build);
+        } else {
+            builder.append(".?");
         }
         return builder.toString();
     }
 
     public boolean matches(Version version) {
+        Integer major = this.major, minor = this.minor, build = this.build;
+        if (null == major) {
+            major = fillInt(operator);
+        }
+        if (null == minor) {
+            minor = fillInt(operator);
+        }
+        if (null == build) {
+            build = fillInt(operator);
+        }
+
         switch (operator) {
             case EQUALS:
-                return version.getMajor() == major && version.getMinor() == minor && version.getBuild() == build;
+                if (null == major || major == version.getMajor()) {
+                    if (null == minor || minor == version.getMinor()) {
+                        if (null == build || build == version.getBuild()) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
             case GREATER_THAN:
-                if (version.getMajor() <= major && minor != null && build != null) {
-                    return false;
+                if (version.getBuild() > build) {
+                    if (version.getMinor() >= minor) {
+                        return version.getMajor() >= major;
+                    }
+                } else {
+                    if (version.getMinor() > minor) {
+                        return version.getMajor() >= major;
+                    }
                 }
-                if (minor != null && version.getMinor() <= minor && build != null) {
-                    return false;
-                }
-                if (build != null && version.getBuild() <= build) {
-                    return false;
-                }
-                return true;
+                return version.getMajor() > major;
             case GREATER_THAN_OR_EQUALS:
-                if (version.getMajor() < major && minor != null && build != null) {
-                    return false;
+                return version.getMajor() >= major && version.getMinor() >= minor && version.getBuild() >= build;
+            case LESS_THAN:
+                if (version.getMajor() < major) {
+                    return true;
+                } else if (minor != null && version.getMajor() == major) {
+                    if (version.getMinor() < minor) {
+                        return true;
+                    } else if (build != null && version.getMinor() == minor) {
+                        return version.getBuild() < build;
+                    }
                 }
-                if (minor != null && version.getMinor() < minor && build != null) {
-                    return false;
-                }
-                if (build != null && version.getBuild() < build) {
-                    return false;
-                }
-                return true;
+                return false;
+            case LESS_THAN_OR_EQUALS:
+                return version.getMajor() <= major && version.getMinor() <= minor && version.getBuild() <= build;
+            default:
+                throw new IllegalStateException("Unsupported operator");
         }
-        return false;
     }
 
-    private static Pattern MATCHED_VERSION_PATTERN = Pattern.compile("([>=]+)\\s?([0-9\\.]+)");
+    private static Pattern MATCHED_VERSION_PATTERN = Pattern.compile("([<>=]+)\\s?([0-9\\.]+)");
 
     public static MatchedVersion valueOf(String value) {
         Matcher matcher = MATCHED_VERSION_PATTERN.matcher(value);
@@ -135,5 +162,21 @@ public class MatchedVersion {
             return new MatchedVersion(major, minor, build, op);
         }
         return null;
+    }
+
+    private static Integer fillInt(Operator operator) {
+        switch (operator) {
+            case GREATER_THAN_OR_EQUALS:
+            case GREATER_THAN:
+                return -1;
+            case EQUALS:
+                return null; // equals to anything
+            case LESS_THAN:
+                return null;
+            case LESS_THAN_OR_EQUALS:
+                return Integer.MAX_VALUE;
+            default:
+                throw new IllegalStateException();
+        }
     }
 }
