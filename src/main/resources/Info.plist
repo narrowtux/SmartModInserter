@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>English</string>
+    <key>CFBundleExecutable</key>
+    <string>JavaAppLauncher</string>
+    <key>CFBundleIconFile</key>
+    <string>GenericJavaApp.icns</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.narrowtux.fmm.FactorioModManagerApplication</string>
+    <key>CFBundleDisplayName</key>
+    <string>FactorioModManager</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>FactorioModManager</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.2.0</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>NSHumanReadableCopyright</key>
+    <string></string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>JVMRuntime</key>
+    <string></string>
+    <key>JVMMainClassName</key>
+    <string>com.narrowtux.fmm.FactorioModManagerApplication</string>
+    <key>JVMClassPaths</key>
+    <array>
+      <string>com/narrowtux/FactorioModManager/0.2.0/FactorioModManager-0.2.0.jar</string>
+    </array>
+    <key>JVMVersion</key>
+    <string>1.8+</string>
+    <key>JVMOptions</key>
+    <array>
+            <string>-Dapple.laf.useScreenMenuBar=true</string>
+            <string>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</string>
+            <string>-Xdock:name=Smart Mod Inserter</string>
+    </array>
+    <key>JVMArguments</key>
+    <array/>
+    <key>LauncherWorkingDirectory</key>
+    <string>$APP_ROOT</string>
+     <key>CFBundleURLTypes</key>
+            <array>
+                <dict>
+                    <key>CFBundleURLName</key>
+                    <string>factoriomods.com installer</string>
+                    <key>CFBundleURLSchemes</key>
+                    <array>
+                        <string>factoriomods</string>
+                    </array>
+                </dict>
+            </array>
+  </dict>
+</plist>
