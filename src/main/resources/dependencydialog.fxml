@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.input.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="499.0" spacing="10.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.narrowtux.fmm.gui.DependencyResolveDialog">
+   <children>
+      <Label text="Dependency resolve found multiple solutions">
+         <font>
+            <Font size="22.0" />
+         </font>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+      </Label>
+      <Label text="This happens when multiple versions of the same mod are available. It is recommended to play with the latest version of all mods." wrapText="true" />
+      <TreeTableView fx:id="solutions" prefHeight="200.0" prefWidth="200.0" showRoot="false" VBox.vgrow="SOMETIMES">
+        <columns>
+          <TreeTableColumn fx:id="modColumn" editable="false" prefWidth="323.0" text="Mod" />
+          <TreeTableColumn fx:id="versionColumn" editable="false" minWidth="0.0" prefWidth="66.0" text="Version" />
+        </columns>
+      </TreeTableView>
+      <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="7.0" VBox.vgrow="NEVER">
+         <children>
+            <CheckBox fx:id="rememberCheck" mnemonicParsing="false" selected="true" text="Remember choice" />
+            <Button cancelButton="true" mnemonicParsing="false" onAction="#onCancel" text="Cancel" />
+            <Button fx:id="useButton" defaultButton="true" mnemonicParsing="false" onAction="#onUse" text="Use" />
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>

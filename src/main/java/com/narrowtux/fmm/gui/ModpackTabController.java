@@ -12,7 +12,9 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TreeItem;
@@ -28,6 +30,10 @@ import javafx.util.converter.DefaultStringConverter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Controller for the modpacks tab
@@ -193,6 +199,33 @@ public class ModpackTabController extends TabController {
             pack = ((Modpack) o);
         }
         if (pack != null) {
+            List<Set<Mod>> solutions = pack.resolveDependencies();
+            Set<Mod> solution = null;
+            if (solutions.size() > 1) {
+                DependencyResolveDialog dialog = null;
+                try {
+                    dialog = new DependencyResolveDialog(solutions);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Optional<Set<Mod>> sol = dialog.showAndWait();
+                if (sol.isPresent()) {
+                    solution = sol.get();
+                    if (solution == DependencyResolveDialog.CANCELLED) {
+                        return;
+                    }
+                } else {
+                    return;
+                }
+            } else if (!solutions.isEmpty()) {
+                solution = solutions.get(0);
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR,
+                        "Could not launch modpack because one or more mods are missing.",
+                        ButtonType.CLOSE);
+                alert.showAndWait();
+                return;
+            }
             ModsInstaller installer = new ModpackInstaller(pack);
             progress.setVisible(true);
             playButton.setDisable(true);
