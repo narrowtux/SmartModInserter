@@ -138,10 +138,6 @@ public class ModpackDetectorVisitor implements FileVisitor<Path> {
                 }
             }
             currentModpack.writeModList(true);
-            System.out.println("solutions for " + currentModpack.getName());
-            for (Set<Mod> solution : currentModpack.resolveDependencies()) {
-                System.out.println(" - " + solution);
-            }
             Datastore.getInstance().getModpacks().add(currentModpack);
             currentModpack = null;
         }
