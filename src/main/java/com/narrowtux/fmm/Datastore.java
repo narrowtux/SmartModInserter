@@ -30,7 +30,6 @@ public class Datastore {
     private FileVisitor<Path> fmmScaner = new ModpackDetectorVisitor(getModpacks());
 
     public Datastore() {
-        SimpleDirectoryWatchService.getInstance().start();
         dataDirProperty().addListener((obj, ov, nv) -> {
             if (nv != null) {
                 Path fmm = getFMMDir();
