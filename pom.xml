@@ -4,7 +4,7 @@
 
     <groupId>com.narrowtux</groupId>
     <artifactId>FactorioModManager</artifactId>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
 
     <properties>
         <github.global.server>github</github.global.server>
