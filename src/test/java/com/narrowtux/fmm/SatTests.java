@@ -5,17 +5,11 @@ import org.sat4j.core.VecInt;
 import org.sat4j.minisat.SolverFactory;
 import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.ISolver;
-import org.sat4j.specs.IVecInt;
 import org.sat4j.specs.TimeoutException;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static junit.framework.Assert.assertTrue;
 
 public class SatTests {
     @Test

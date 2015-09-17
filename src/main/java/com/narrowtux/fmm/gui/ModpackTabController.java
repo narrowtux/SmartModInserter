@@ -1,30 +1,26 @@
 package com.narrowtux.fmm.gui;
 
-import com.narrowtux.fmm.model.Datastore;
+import com.narrowtux.fmm.io.FileDeleter;
 import com.narrowtux.fmm.io.tasks.ModpackInstaller;
 import com.narrowtux.fmm.io.tasks.ModsInstaller;
 import com.narrowtux.fmm.io.tasks.TaskService;
+import com.narrowtux.fmm.model.Datastore;
 import com.narrowtux.fmm.model.Mod;
 import com.narrowtux.fmm.model.ModReference;
 import com.narrowtux.fmm.model.Modpack;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
+import javafx.util.Duration;
 import javafx.util.converter.DefaultStringConverter;
 
 import java.io.IOException;
@@ -33,7 +29,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * Controller for the modpacks tab
@@ -54,6 +49,8 @@ public class ModpackTabController extends TabController {
     @FXML
     Button playButton;
     Tab tab = new Tab("Modpacks");
+
+    ContextMenu contextMenu = new ContextMenu();
 
     private final Datastore store;
     private final ConsoleWindow consoleWindow;
@@ -166,6 +163,30 @@ public class ModpackTabController extends TabController {
                 };
             }
         });
+
+        MenuItem remove = new MenuItem("Remove");
+        remove.setOnAction(this::onRemoveAction);
+        contextMenu.getItems().add(remove);
+
+        modpacks.setContextMenu(contextMenu);
+    }
+
+    public void onRemoveAction(ActionEvent event) {
+        for (TreeItem selected : modpacks.getSelectionModel().getSelectedItems()) {
+            if (selected.getValue() instanceof Modpack) {
+                Modpack pack = (Modpack) selected.getValue();
+                store.getModpacks().remove(pack);
+                FileDeleter deleter = new FileDeleter();
+                try {
+                    Files.walkFileTree(pack.getPath(), deleter);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else if (selected.getValue() instanceof ModReference) {
+                ModReference mod = (ModReference) selected.getValue();
+                mod.getModpack().getMods().remove(mod);
+            }
+        }
     }
 
     @FXML
@@ -176,8 +197,17 @@ public class ModpackTabController extends TabController {
             Files.createDirectory(path);
             Modpack pack = new Modpack(name, path);
             store.getModpacks().add(pack);
-            modpacks.getSelectionModel().selectLast();
-            Platform.runLater(() -> modpacks.edit(modpacks.getSelectionModel().getSelectedIndex(), nameColumn));
+            Timeline t = new Timeline(new KeyFrame(Duration.millis(100), ae -> {
+                for (TreeItem item : modpacks.getRoot().getChildren()) {
+                    if (item.getValue() == pack) {
+                        modpacks.getSelectionModel().select(item);
+                        modpacks.edit(modpacks.getSelectionModel().getSelectedIndex(), nameColumn);
+                        return;
+                    }
+                }
+            }));
+            t.play();
+            // TODO figure out why committing the edit doesn't update the value
         } catch (IOException e) {
             e.printStackTrace();
         }

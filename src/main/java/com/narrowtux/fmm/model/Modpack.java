@@ -1,6 +1,8 @@
 package com.narrowtux.fmm.model;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -10,23 +12,14 @@ import javafx.collections.ObservableSet;
 import org.sat4j.core.VecInt;
 import org.sat4j.minisat.SolverFactory;
 import org.sat4j.specs.ContradictionException;
-import org.sat4j.specs.IConstr;
 import org.sat4j.specs.ISolver;
 import org.sat4j.tools.ModelIterator;
 
-import javax.xml.crypto.Data;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Modpack {
@@ -41,6 +34,7 @@ public class Modpack {
         setPath(path);
 
         nameProperty().addListener((obs, ov, nv) -> {
+            // sanity check. no slashes allowed
             if (nv == null || nv.isEmpty() || nv.contains("/")) {
                 setName(ov);
                 return;

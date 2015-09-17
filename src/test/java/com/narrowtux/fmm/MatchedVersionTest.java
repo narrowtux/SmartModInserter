@@ -4,13 +4,8 @@ import com.narrowtux.fmm.model.MatchedVersion;
 import com.narrowtux.fmm.model.Version;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static junit.framework.Assert.*;
 
-/**
- * Created by tux on 13/08/15.
- */
 public class MatchedVersionTest {
     @Test
     public void testMatchedVersions() {
