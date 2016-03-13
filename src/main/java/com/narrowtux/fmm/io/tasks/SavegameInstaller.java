@@ -28,12 +28,16 @@ public class SavegameInstaller extends ModsInstaller {
 
     @Override
     protected Process startFactorio() throws IOException {
-        Process process = null;
+        String[] args;
+        String exePath = Datastore.getInstance().getFactorioApplication().toString();
+
         if (OS.isMac()) {
-            process = Runtime.getRuntime().exec(new String[]{"open", Datastore.getInstance().getFactorioApplication().toString(), "--args", "--mp-load-game", savegame.getPath().getFileName().toString()});
+            args = new String[] { "open", exePath, "--args",
+                                  "--mp-load-game", savegame.getPath().getFileName().toString() };
         } else {
-            process = Runtime.getRuntime().exec(Datastore.getInstance().getFactorioApplication().toString());
+            args = new String[] { exePath,
+                                  "--mp-load-game", savegame.getPath().getFileName().toString() };
         }
-        return process;
+        return Runtime.getRuntime().exec(args);
     }
 }

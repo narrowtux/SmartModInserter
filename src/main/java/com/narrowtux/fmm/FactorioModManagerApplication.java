@@ -65,7 +65,34 @@ public class FactorioModManagerApplication extends Application {
                 Path appData = Paths.get(System.getenv("AppData"));
                 store.setDataDir(appData.resolve("factorio"));
                 store.setStorageDir(appData.resolve("FactorioModManager"));
-            } // linux users have to define everything themselves
+            } else {
+                String xdgConf = System.getenv("XDG_CONFIG_DIR");
+                String xdgData = System.getenv("XDG_DATA_HOME");
+
+                if (xdgConf == null)
+                    xdgConf = Paths.get(System.getenv("HOME"), ".config").toString();
+                if (xdgData == null)
+                    xdgData = Paths.get(System.getenv("HOME"), ".local/share").toString();
+
+                store.setStorageDir(Paths.get(xdgConf, "FactorioModManager"));
+                store.setDataDir(Paths.get(System.getenv("HOME"), ".factorio"));
+
+                Path[] possibleExe = {
+                    Paths.get("/usr/bin/factorio"),
+                    Paths.get(xdgData, "steam/SteamApps/common/Factorio/bin/x64/factorio"),
+                    Paths.get(xdgData, "steam/SteamApps/common/Factorio/bin/i386/factorio"),
+                    Paths.get(System.getenv("HOME"), "factorio/bin/x64/factorio"),
+                    Paths.get(System.getenv("HOME"), "factorio/bin/i386/factorio"),
+                };
+
+                for (Path exePath : possibleExe) {
+                    if (Files.exists(exePath)) {
+                        store.setFactorioApplication(exePath);
+                        break;
+                    }
+                }
+            }
+
             Path settingsPath = store.getStorageDir().resolve("settings.json");
             if (Files.exists(settingsPath)) {
                 JsonObject settings = new Gson().fromJson(new FileReader(settingsPath.toFile()), JsonObject.class);
@@ -75,6 +102,8 @@ public class FactorioModManagerApplication extends Application {
                 if (settings.has("executable")) {
                     store.setFactorioApplication(Paths.get(settings.get("executable").getAsString()));
                 }
+            } else if (!Files.exists(store.getStorageDir())) {
+                Files.createDirectories(store.getStorageDir());
             }
 
             if (store.getFactorioApplication() == null || store.getDataDir() == null) {
@@ -89,10 +118,6 @@ public class FactorioModManagerApplication extends Application {
                     }
                 });
             } else {
-                if (!Files.exists(store.getStorageDir())) {
-                    Files.createDirectories(store.getStorageDir());
-                }
-
                 continueStartup(primaryStage, store);
             }
         } catch (Exception e) {

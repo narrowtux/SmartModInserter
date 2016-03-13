@@ -29,7 +29,7 @@ public class ModpackInstaller extends ModsInstaller {
         if (OS.isMac()) {
             application = application.resolve("Contents/MacOS/factorio");
         }
-        process = Runtime.getRuntime().exec(application.toAbsolutePath().toString());
+        process = Runtime.getRuntime().exec(new String[] { application.toAbsolutePath().toString() });
 
         return process;
     }
