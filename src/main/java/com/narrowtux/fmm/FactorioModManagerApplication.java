@@ -102,6 +102,8 @@ public class FactorioModManagerApplication extends Application {
                 if (settings.has("executable")) {
                     store.setFactorioApplication(Paths.get(settings.get("executable").getAsString()));
                 }
+            } else if (!Files.exists(store.getStorageDir())) {
+                Files.createDirectories(store.getStorageDir());
             }
 
             if (store.getFactorioApplication() == null || store.getDataDir() == null) {
@@ -116,10 +118,6 @@ public class FactorioModManagerApplication extends Application {
                     }
                 });
             } else {
-                if (!Files.exists(store.getStorageDir())) {
-                    Files.createDirectories(store.getStorageDir());
-                }
-
                 continueStartup(primaryStage, store);
             }
         } catch (Exception e) {
