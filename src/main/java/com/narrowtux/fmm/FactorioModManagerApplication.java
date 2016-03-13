@@ -127,10 +127,12 @@ public class FactorioModManagerApplication extends Application {
     }
 
     private void loadSettingsWindow() throws IOException {
-        Parent settingsRoot = (Parent) Util.loadFXML(GuiFiles.SETTINGS_WINDOW, () -> settingsWindowController).getNode();
-        settingsStage = new Stage();
-        settingsStage.setScene(new Scene(settingsRoot));
-        settingsWindowController.setWindow(settingsStage);
+        if (settingsStage == null) {
+            Parent settingsRoot = (Parent) Util.loadFXML(GuiFiles.SETTINGS_WINDOW, () -> settingsWindowController).getNode();
+            settingsStage = new Stage();
+            settingsStage.setScene(new Scene(settingsRoot));
+            settingsWindowController.setWindow(settingsStage);
+        }
     }
 
     private void continueStartup(Stage primaryStage, Datastore store) throws IOException {
