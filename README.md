@@ -44,6 +44,12 @@ To run, you need the Java Runtime Environment with version `8 u 40` or higher. W
 
 If you have Java installed, simply opening the `.jar` or `.app` is enough to launch Smart Mod Inserter. 
 
+#### Linux Users
+
+JavaFX is required and may not be installed by default. On Ubuntu, you can fix this by installing these packages:
+
+    sudo apt-get install openjdk-8-jre openjfx libopenjfx-java
+
 ### First launch
 
 Upon first launching Smart Mod Inserter, it will probably ask you to define the factorio application path and the data path. On some setups, it will automatically be able to figure out some of those paths. Until you have all necessary paths selected, the close button will stay disabled.
